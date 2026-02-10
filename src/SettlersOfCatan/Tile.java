@@ -4,50 +4,60 @@
 
 package SettlersOfCatan;
 
-/************************************************************/
 /**
- * 
+ * A hex tile on the board. Produces a resource when corresponding number is rolled (except Desert).
  */
 public abstract class Tile {
-	/**
-	 * 
-	 */
-	private int q;
-	/**
-	 * 
-	 */
-	private int s;
-	/**
-	 * 
-	 */
-	private int r;
-	/**
-	 * 
-	 */
-	private undef resource;
-	/**
-	 * 
-	 */
-	private int number;
-	/**
-	 * 
-	 */
-	private Node[] nodes;
-	/**
-	 * 
-	 */
-	private Edge[] edges;
+	private final int q;
+	private final int s;
+	private final int r;
+	private final TerrainType terrain;
+	private final int number;  // dice number 2-12 (0 for desert)
+	private final Node[] nodes;
+	private final Edge[] edges;
 
-	/**
-	 * 
-	 */
-	public void produceResource() {
+	public Tile(int q, int s, int r, TerrainType terrain, int number, Node[] nodes, Edge[] edges) {
+		this.q = q;
+		this.s = s;
+		this.r = r;
+		this.terrain = terrain;
+		this.number = number;
+		if (nodes == null) nodes = new Node[0];
+		if (edges == null) edges = new Edge[0];
+		this.nodes = nodes;
+		this.edges = edges;
+	}
+
+	public int getQ(){
+		return q;
+	}
+	public int getS(){
+		return s;
+	}
+	public int getR(){
+		return r;
+	}
+	public TerrainType getTerrain(){
+		return terrain;
+	}
+	public int getNumber(){
+		return number;
+	}
+	public Node[] getNodes(){
+		return nodes;
+	}
+	public Edge[] getEdges(){
+		return edges;
 	}
 
 	/**
-	 * 
-	 * @return 
+	 * Produce resource for adjacent settlements/cities when this number is rolled.
+	 * Desert produces nothing
 	 */
-	public Tile getAdjacentTiles() {
-	}
+	public abstract void produceResource();
+
+	/**
+	 * Tiles adjacent to this one (shared edge).
+	 */
+	public abstract Tile[] getAdjacentTiles();
 }

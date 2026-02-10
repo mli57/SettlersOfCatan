@@ -4,20 +4,30 @@
 
 package SettlersOfCatan;
 
-/************************************************************/
 /**
- * 
+ * City: 2 victory points; produces double resources when adjacent tiles roll.
  */
-public class City {
-	/**
-	 * 
-	 */
-	private int victoryPoints = 2;
+public class City extends Building {
+	private static final int VICTORY_POINTS = 2;
+
+	public City(Player owner) {
+		super(owner);
+	}
+
+	@Override
+	public int getVictoryPoints() {
+		return VICTORY_POINTS;
+	}
+
+	@Override
+	public boolean canUpgradeToCity() {
+		return false; // already a city
+	}
 
 	/**
-	 * 
-	 * @return 
+	 * Cities produce double resources on dice rolls for adjacent tiles.
 	 */
 	public boolean producesDouble() {
+		return true;
 	}
 }

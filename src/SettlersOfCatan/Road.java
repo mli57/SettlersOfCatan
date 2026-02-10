@@ -4,9 +4,8 @@
 
 package SettlersOfCatan;
 
-/************************************************************/
 /**
- * 
+ * A road placed on an edge; owned by a player. Used for longest road calculation.
  */
 public class Road {
 	/**

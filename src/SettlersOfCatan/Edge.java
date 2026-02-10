@@ -4,9 +4,8 @@
 
 package SettlersOfCatan;
 
-/************************************************************/
 /**
- * 
+ * An edge between two nodes; can hold at most one Road.
  */
 public class Edge {
 	/**

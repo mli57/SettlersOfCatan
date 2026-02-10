@@ -4,18 +4,11 @@
 
 package SettlersOfCatan;
 
-/************************************************************/
 /**
- * 
+ * A vertex between tiles on the board where a settlement/city can be built.
  */
 public class Node {
-	/**
-	 * 
-	 */
-	private int id;
-	/**
-	 * 
-	 */
+	private final int id;
 	private Building building;
 	/**
 	 * 

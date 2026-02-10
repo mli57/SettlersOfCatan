@@ -4,20 +4,17 @@
 
 package SettlersOfCatan;
 
-/************************************************************/
 /**
- * 
+ * A resource card held by a player (type is one of the five resources).
  */
 public class ResourceCard {
-	/**
-	 * 
-	 */
-	private undef type;
+	private final ResourceType type;
 
-	/**
-	 * 
-	 * @return 
-	 */
-	public void getType() {
+	public ResourceCard(ResourceType type) {
+		this.type = type;
+	}
+
+	public ResourceType getType() {
+		return type;
 	}
 }

@@ -4,29 +4,27 @@
 
 package SettlersOfCatan;
 
-/************************************************************/
 /**
- * 
+ * Abstract base for structures placed on nodes (Settlement, City).
  */
-public abstract class Building extends Settlement {
-	/**
-	 * 
-	 */
-	private Player owner;
-	/**
-	 * 
-	 */
-	private int victoryPoints;
+public abstract class Building {
+	private final Player owner;
 
-	/**
-	 * 
-	 */
-	public void getVictoryPoints() {
+	public Building(Player owner) {
+		this.owner = owner;
+	}
+
+	public Player getOwner() {
+		return owner;
 	}
 
 	/**
-	 * 
+	 * Victory points this building contributes.
 	 */
-	public void upgrade() {
-	}
+	public abstract int getVictoryPoints();
+
+	/**
+	 * Whether this building can be upgraded (Settlement -> City).
+	 */
+	public abstract boolean canUpgradeToCity();
 }

@@ -4,20 +4,23 @@
 
 package SettlersOfCatan;
 
-/************************************************************/
 /**
- * 
+ * Settlement: 1 victory point; can be upgraded to City.
  */
-public class Settlement {
-	/**
-	 * 
-	 */
-	private int victoryPoints = 1;
+public class Settlement extends Building {
+	private static final int VICTORY_POINTS = 1;
 
-	/**
-	 * 
-	 * @return 
-	 */
+	public Settlement(Player owner) {
+		super(owner);
+	}
+
+	@Override
+	public int getVictoryPoints() {
+		return VICTORY_POINTS;
+	}
+
+	@Override
 	public boolean canUpgradeToCity() {
+		return true;
 	}
 }
