@@ -48,17 +48,36 @@ public class Game {
 	private static final int numPlayers = 4;
 
 
+	/**The max number of rounds in the game */
+	private int maxRounds;
+
+
 
 	/**
 	 * Constructor for Game class
 	 */
 	public Game(){
+
+		try { 
+			this.mamxRounds = ConfigReader.readTurns();
+			System.out.println("Game initialized with max rounds: " + maxRounds);
+
+		} catch (IOException e){
+			System.err.println("Error reading config file: " + e.getMessage());
+			System.err.println("Using default: 8192 rounds");
+			this.maxRounds = 8192;
+		}
+
+
 		this.board = new Board();
 		this.dice = new DiceRoller();
 		this.players = new Player[numPlayers];
 
 		this.currentPlayer = 0;
 		this.roundCount = 0;
+
+		initializePlayers();
+		setupInitialPlacements();
 	}
 
 	/**
@@ -134,7 +153,7 @@ public class Game {
 	private void distributeResources(int diceRoll){
 		System.out.println("Distributing resources for roll: " + diceRoll);
 
-		for(Player player : players){
+		for (Player player : players){
 			player.collectResources(board, diceRoll);
 		}
 	}
@@ -145,10 +164,17 @@ public class Game {
 	 * @return false - if game is not over
 	 */
 	public boolean isGameOver() {
-		for(Player player : players){
+		for (Player player : players){
+			// check if no. of victory points was met
 			if(player.getVictoryPoints() >= winningPoints){
 				return true;
 			}
+		}
+
+		// check if the max no. of rounds has been reached
+		if (roundCount >= maxRounds){
+			System.out.println("Max rounds (" + maxRounds + ") reached!");
+			return true;
 		}
 		return false;
 	}
