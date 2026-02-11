@@ -20,7 +20,7 @@ public class Player {
 	/**
 	 * 
 	 */
-	private EMap resources;
+	private Map resources;
 	/**
 	 * 
 	 */
@@ -38,11 +38,23 @@ public class Player {
 	 */
 	private int victoryPoints;
 
+	public Player(PlayerColor color, ResourceCard[] resources){
+		this.color = color;
+		this.victoryPoints = 0;
+		this.resources = new Map<ResourceType, Integer>;
+		for (int i = 0; i<ResourceType.values().length; i++){
+			resource.put(ResourceType.values()[i], 0);
+		}
+		
+	}
+
 	/**
 	 * 
 	 * @param res 
 	 */
 	public void addResource(undef res) {
+
+
 	}
 
 	/**
@@ -79,5 +91,6 @@ public class Player {
 	 * @return 
 	 */
 	public int getVictoryPoints() {
+		return this.victoryPoints;
 	}
 }
