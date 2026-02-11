@@ -135,7 +135,7 @@ public class Game {
 
 		// roll dice
 		int diceRoll = rollDice();
-		System.out.println("Dice roll: " + diceRoll);
+		System.out.println(roundCount + " / Player " + player.getId() + ": Rolled a " + diceRoll);
 	}
 
 	/**
@@ -151,10 +151,11 @@ public class Game {
      * Players receive resources from tiles adjacent to their settlements/cities.
      */
 	private void distributeResources(int diceRoll){
-		System.out.println("Distributing resources for roll: " + diceRoll);
+		
 
 		for (Player player : players){
 			player.collectResources(board, diceRoll);
+			System.out.println(roundCount + " / Player " + player.getId() + ": Rolled a " + diceRoll);
 		}
 	}
 
@@ -173,7 +174,7 @@ public class Game {
 
 		// check if the max no. of rounds has been reached
 		if (roundCount >= maxRounds){
-			System.out.println("Max rounds (" + maxRounds + ") reached!");
+			System.out.println(roundCount + " / Player " + player.getId() + ": Rolled a " + diceRoll);
 			return true;
 		}
 		return false;
@@ -201,8 +202,8 @@ public class Game {
      * - Board state
 	 */
 	public void getCurrentState() {
-		System.out.println("GAME STATE");
-		System.out.println("ROund: " + roundCount);
+		System.out.println("====================================")
+		System.out.println("GAME STATE - Round" + roundCount);
 		System.out.println("Current Player: Player" + (currentPlayer + 1));
 		System.out.println("Player Standings: ");
 
@@ -256,9 +257,13 @@ public class Game {
 		}
 
 		Player winner = getWinner();
-		System.out.println("GAME OVER");
-		System.out.println("Player" + winner.getId() + "wins with " + winner.getVictoryPoints() + " victory points!");
-		System.out.println("Total rounds played: " + roundCount);
+
+		if (winner != null){
+			System.out.println(roundCount + " / Player " + winner.getId() + ": Wins with " + winner.getVictoryPoints() + " victory points!");
+		} else {
+			System.out.println(roundCount + " / Game: No winner — max rounds reached.");
+		}
+		System.out.println(roundCount + " / Game: Total rounds played: " + roundCount);
 		getCurrentState();
 	}
 }
