@@ -67,7 +67,7 @@ public class Tile {
 		  case MOUNTAINS:
 			  return ResourceType.ORE;
 		  case DESERT:
-			  return null;
+			  return ResourceType.NULL;
 		}
 	  }
 }

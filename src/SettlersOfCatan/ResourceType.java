@@ -13,5 +13,5 @@ public enum ResourceType {
 	SHEEP,
 	WHEAT,
 	ORE,
-	Null
+	NULL
 }
