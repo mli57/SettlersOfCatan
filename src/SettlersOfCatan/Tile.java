@@ -54,7 +54,7 @@ public class Tile {
 	 * Produce resource for adjacent settlements/cities when this number is rolled.
 	 * Desert produces nothing
 	 */
-	public void produceResource(){
+	public ResourceType produceResource(){
 		switch(terrain){
 		  case FOREST: 
 			  return ResourceType.WOOD;
@@ -67,7 +67,7 @@ public class Tile {
 		  case MOUNTAINS:
 			  return ResourceType.ORE;
 		  case DESERT:
-			  return;
+			  return null;
 		}
 	  }
 }
