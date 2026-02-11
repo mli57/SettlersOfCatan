@@ -6,6 +6,6 @@ package SettlersOfCatan;
 public enum PlayerColor {
 	RED,
 	BLUE,
-	GREEN,
-	YELLOW
+	WHITE,
+	ORANGE
 }
