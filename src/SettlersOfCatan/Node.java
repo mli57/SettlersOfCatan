@@ -14,10 +14,20 @@ import java.util.ArrayList;
  * A vertex between tiles on the board where a settlement/city can be built.
  */
 public class Node {
+
+	/** Unique id for the node on the board */
 	private final int id;
+
+	/** The type of building currently occupying the node */
 	private Building building;
+
+	/** The player who owns the building at the node  */
 	private Player occupyingPlayer;
+
+	/** List of nodes directly connected to the node via edges  */
 	private List<Node> adjacentNodes;
+
+	/** List of tiles that touch the node */
 	private List<Tile> adjacentTiles;
 
 
