@@ -7,7 +7,7 @@ package SettlersOfCatan;
 /**
  * A resource card held by a player (type is one of the five resources).
  */
-public class ResourceCard {
+public class ResourceCard extends Tile{
 	private final ResourceType type;
 
 	public ResourceCard(ResourceType type) {
@@ -17,4 +17,6 @@ public class ResourceCard {
 	public ResourceType getType() {
 		return type;
 	}
+
+	
 }

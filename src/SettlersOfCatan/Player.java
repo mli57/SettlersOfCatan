@@ -16,11 +16,11 @@ public class Player {
 	/**
 	 * 
 	 */
-	private undef color;
+	private PlayerColor color;
 	/**
 	 * 
 	 */
-	private Map resources;
+	private Map<ResourceType, Integer> resources;
 	/**
 	 * 
 	 */
@@ -38,21 +38,21 @@ public class Player {
 	 */
 	private int victoryPoints;
 
-	public Player(PlayerColor color, ResourceCard[] resources){
+	public Player(PlayerColor color){
 		this.color = color;
+
 		this.victoryPoints = 0;
-		this.resources = new Map<ResourceType, Integer>;
+		this.resources = new EnumMap<ResourceType, Integer>(ResourceType.class);
 		for (int i = 0; i<ResourceType.values().length; i++){
-			resource.put(ResourceType.values()[i], 0);
+			resources.put(ResourceType.values()[i], 0);
 		}
-		
 	}
 
 	/**
 	 * 
 	 * @param res 
 	 */
-	public void addResource(undef res) {
+	public void addResource(ResourceType res) {
 
 
 	}
@@ -63,6 +63,8 @@ public class Player {
 	 * @return 
 	 */
 	public boolean removeResource(boolean res) {
+		return false;
+	
 	}
 
 	/**
@@ -70,6 +72,7 @@ public class Player {
 	 * @return 
 	 */
 	public boolean canBuildRoad() {
+		return false;
 	}
 
 	/**
@@ -77,6 +80,7 @@ public class Player {
 	 * @return 
 	 */
 	public boolean canBuildSettlement() {
+		return false;
 	}
 
 	/**
@@ -84,6 +88,7 @@ public class Player {
 	 * @return 
 	 */
 	public boolean canBuildCity() {
+		return false;
 	}
 
 	/**
