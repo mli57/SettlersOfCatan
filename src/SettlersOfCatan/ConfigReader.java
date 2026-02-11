@@ -24,7 +24,7 @@ public class ConfigReader {
 
 
     public static int readTurns(String filename) throws IOException {
-        try (BufferedReader reader = nwe BufferedReader(new FileReader(filename))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
 
             while ((line = reader.readLine()) != null){
