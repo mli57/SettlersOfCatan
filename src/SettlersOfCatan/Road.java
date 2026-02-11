@@ -5,21 +5,27 @@
 package SettlersOfCatan;
 
 /**
- * A road placed on an edge; owned by a player. Used for longest road calculation.
+ * A road placed on an edge and owned by a player. Used for longest road calculation.
  */
 public class Road {
-	/**
-	 * 
-	 */
-	private Player owner;
-	/**
-	 * 
-	 */
-	private Edge edge;
+	private final Player owner;
+	private final Edge edge;
+
+	public Road(Player owner, Edge edge) {
+		this.owner = owner;
+		this.edge = edge;
+	}
+
+	public Player getOwner() {
+		return owner;
+	}
+
+	public Edge getEdge() {
+		return edge;
+	}
 
 	/**
-	 * 
-	 * @return 
+	 * Length of longest continuous road through this road (computed by Board/Game).
 	 */
 	public int getLongestRoadCount() {
 	}

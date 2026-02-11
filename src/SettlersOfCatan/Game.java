@@ -6,55 +6,259 @@ package SettlersOfCatan;
 
 /************************************************************/
 /**
- * 
+ * Game.java - Main game controller for the Settlers Of Catan simulator.
+ * The Game class runs the game, manages the players turns, progresses each round and handles win detection.
+ * It serves as a coordinator between the Board and Player classes.
  */
+
+
 public class Game {
 	/**
-	 * 
+	 * Board object for getting the board
 	 */
 	private Board board;
+
+
+	/** DiceRoller object for dice roll */
+	private DiceRoller dice;
+
 	/**
-	 * 
+	 * Player object for getting players
 	 */
 	private Player[] players;
+
+
 	/**
-	 * 
+	 * private variable to track the current player
 	 */
 	private int currentPlayer;
+
+
 	/**
-	 * 
+	 * private variable to track the round count
 	 */
 	private int roundCount;
 
+
+	/**The number of points needed to win the game */
+	private static final int winningPoints = 10;
+
+
+	/**The number of players needed to play the game */
+	private static final int numPlayers = 4;
+
+
+	/**The max number of rounds in the game */
+	private int maxRounds;
+
+
+
 	/**
-	 * 
+	 * Constructor for Game class
 	 */
-	private void playRound() {
+	public Game(){
+
+		try { 
+			this.mamxRounds = ConfigReader.readTurns();
+			System.out.println("Game initialized with max rounds: " + maxRounds);
+
+		} catch (IOException e){
+			System.err.println("Error reading config file: " + e.getMessage());
+			System.err.println("Using default: 8192 rounds");
+			this.maxRounds = 8192;
+		}
+
+
+		this.board = new Board();
+		this.dice = new DiceRoller();
+		this.players = new Player[numPlayers];
+
+		this.currentPlayer = 0;
+		this.roundCount = 0;
+
+		initializePlayers();
+		setupInitialPlacements();
 	}
 
 	/**
-	 * 
+     * Initialize all players with starting resources and unique identifiers.
+     */
+	private void initializePlayers(){
+		for(int i = 0; i < numPlayers; i++){
+			players[i] = new Player(i + 1);
+		}
+	}
+
+	/**
+     * Handle initial settlement and road placement phase.
+     * Each player places 2 settlements and 2 roads before the main game.
+     */
+	private void setupInitialPlacements(){
+		for(int i = 0; i < numPlayers; i++){
+			players[i].placeInitialSettlement(board);
+			players[i].placeInitialRoad(board);
+		}
+
+		for(int i = numPlayers - 1; i >= 0; i--){
+			players[i].placeInitialSettlement(board);
+            players[i].placeInitialRoad(board);
+            players[i].collectInitialResources(board);
+		}
+	}
+
+/**
+ * Plays a complete round where each player takes one turn.
+ */
+	private void playRound() {
+		roundCount++;
+
+		for(int i = 0; i < numPlayers; i++){
+			currentPlayer = i;
+			playTurn();
+
+
+			if(isGameOver()){
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Executes a single player's turn.
+	 * -Rolls the dice
+	 * -Distributes resources
+	 * -Player actions
+	 * -Ends Turn
 	 */
 	public void playTurn() {
+		Player player = players[currentPlayer];
+
+		// roll dice
+		int diceRoll = rollDice();
+		System.out.println("Dice roll: " + diceRoll);
+	}
+
+	/**
+	 * Rolls two dice using the rollTwoDice from the DiceRoller class and returns the sum
+	 * @return sum of the dice roll
+	 */
+	private int rollDice(){
+		return diceRoller.rollTwoDice();
+	}
+
+	/**
+     * Distributes resources to all players based on dice roll.
+     * Players receive resources from tiles adjacent to their settlements/cities.
+     */
+	private void distributeResources(int diceRoll){
+		System.out.println("Distributing resources for roll: " + diceRoll);
+
+		for (Player player : players){
+			player.collectResources(board, diceRoll);
+		}
 	}
 
 	/**
 	 * 
-	 * @return 
+	 * @return true - if game is over
+	 * @return false - if game is not over
 	 */
 	public boolean isGameOver() {
+		for (Player player : players){
+			// check if no. of victory points was met
+			if(player.getVictoryPoints() >= winningPoints){
+				return true;
+			}
+		}
+
+		// check if the max no. of rounds has been reached
+		if (roundCount >= maxRounds){
+			System.out.println("Max rounds (" + maxRounds + ") reached!");
+			return true;
+		}
+		return false;
 	}
 
 	/**
-	 * 
-	 * @return 
+	 * Returns the player who has won the game.
+	 * It is only called after isGameOver() returns true.
+	 * @return the winning Player, or null if no winner yet
 	 */
 	public Player getWinner() {
+		for(Player player : players){
+			if(player.getVictoryPoints() >= winningPoints){
+				return player;
+			}
+		}
+		return null; // no winner yet
 	}
 
 	/**
-	 * 
+	 * Displays the current game state including:
+	 * - Current round
+     * - Current player
+     * - Each player's victory points and resources
+     * - Board state
 	 */
 	public void getCurrentState() {
+		System.out.println("GAME STATE");
+		System.out.println("ROund: " + roundCount);
+		System.out.println("Current Player: Player" + (currentPlayer + 1));
+		System.out.println("Player Standings: ");
+
+		for(Player player : players){
+			System.out.println("Player " + player.getId() + ": " + player.getVictoryPoints() + " VP | " + "Resources: " + player.getTotalResourceCa + "Dev Cards: " + player.getDevelopmentCardCount());
+		}
+
+		System.out.println("Board State:");
+		board.displayBoard();
+		System.out.println("====================================");
+	}
+
+	/**
+	 * Accessor for the game board
+	 */
+	public Board getBoard(){
+		return board;
+	}
+
+	/**
+     * Accessor for all players.
+     */
+    public Player[] getPlayers() {
+        return players;
+    }
+	
+
+	 /**
+     * Accessor for current player index.
+     */
+    public int getCurrentPlayerIndex() {
+        return currentPlayer;
+    }
+
+	/**
+     * Accessor for round count.
+     */
+    public int getRoundCount() {
+        return roundCount;
+    }
+
+	/**
+	 * Main game loop that runs until a player wins.
+	 */
+	public void start(){
+		System.out.print("Game Started!");
+		getCurrentState();
+
+		while(!isGameOver()){
+			playRound();
+		}
+
+		Player winner = getWinner();
+		System.out.println("GAME OVER");
+		System.out.println("Player" + winner.getId() + "wins with " + winner.getVictoryPoints() + " victory points!");
+		System.out.println("Total rounds played: " + roundCount);
+		getCurrentState();
 	}
 }

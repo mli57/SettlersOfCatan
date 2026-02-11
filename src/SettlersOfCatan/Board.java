@@ -53,4 +53,7 @@ public class Board {
 	 */
 	public void rollDice(int number) {
 	}
+
+	public void generateBoard() {
+		
 }
