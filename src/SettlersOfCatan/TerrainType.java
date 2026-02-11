@@ -8,10 +8,10 @@ package SettlersOfCatan;
  * Terrain types for board tiles. Desert produces no resource.
  */
 public enum TerrainType {
-	WOOD,
-	BRICK,
-	SHEEP,
-	WHEAT,
-	ORE,
+	FOREST,
+	PASTURE,
+	FIELDS,
+	HILLS,
+	MOUNTAINS,
 	DESERT
 }

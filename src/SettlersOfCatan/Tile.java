@@ -7,7 +7,7 @@ package SettlersOfCatan;
 /**
  * A hex tile on the board. Produces a resource when corresponding number is rolled (except Desert).
  */
-public abstract class Tile {
+public class Tile {
 	private final int q;
 	private final int s;
 	private final int r;
@@ -54,10 +54,20 @@ public abstract class Tile {
 	 * Produce resource for adjacent settlements/cities when this number is rolled.
 	 * Desert produces nothing
 	 */
-	public abstract void produceResource();
-
-	/**
-	 * Tiles adjacent to this one (shared edge).
-	 */
-	public abstract Tile[] getAdjacentTiles();
+	public void produceResource(){
+		switch(terrain){
+		  case FOREST: 
+			  return ResourceType.WOOD;
+		  case PASTURE:
+			  return ResourceType.SHEEP;
+		  case FIELDS:
+			  return ResourceType.WHEAT;
+		  case HILLS:
+			  return ResourceType.BRICK;
+		  case MOUNTAINS:
+			  return ResourceType.ORE;
+		  case DESERT:
+			  return;
+		}
+	  }
 }
