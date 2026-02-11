@@ -173,7 +173,7 @@ public class Game {
      */
     public Player getWinner() {
         for (Player player : players) {
-            if (player.getVictoryPoints() >= WINNING_VICTORY_POINTS) {
+            if (player.getVictoryPoints() >= winningPoints) {
                 return player;
             }
         }
