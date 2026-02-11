@@ -12,8 +12,14 @@ public class DiceRoller {
 	/**
 	 * 
 	 * @param rollTwoDice 
+	 * @return the sum of two dice
 	 */
-	public void rollTwoDice(int rollTwoDice) {
+
+	private final Random random;
+
+
+	public int rollTwoDice(int rollTwoDice) {
+		return roll(6) + roll(6);
 	}
 
 	/**
@@ -21,6 +27,7 @@ public class DiceRoller {
 	 * @param sides 
 	 * @return 
 	 */
-	public int roll(undef sides) {
+	public int roll(int sides) {
+		return random.nextInt(sides) + 1;
 	}
 }
