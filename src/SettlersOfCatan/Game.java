@@ -167,20 +167,6 @@ public class Game {
 		return null; // no winner yet
 	}
 
-	 /**
-     * Returns the player who has won the game.
-     * @return the winning Player, or null if no winner yet
-     */
-    public Player getWinner() {
-        for (Player player : players) {
-            if (player.getVictoryPoints() >= winningPoints) {
-                return player;
-            }
-        }
-        return null;
-    }
-
-
 	/**
 	 * Displays the current game state including:
 	 * - Current round
@@ -195,7 +181,7 @@ public class Game {
 		System.out.println("Player Standings: ");
 
 		for(Player player : players){
-			System.out.println("Player " + player.getId() + ": " + player.getVictoryPoints() + " VP | " + "Resources: " + player.getTotalResourceCa"Dev Cards: " + player.getDevelopmentCardCount());
+			System.out.println("Player " + player.getId() + ": " + player.getVictoryPoints() + " VP | " + "Resources: " + player.getTotalResourceCa + "Dev Cards: " + player.getDevelopmentCardCount());
 		}
 
 		System.out.println("Board State:");
@@ -236,7 +222,7 @@ public class Game {
 	 * Main game loop that runs until a player wins.
 	 */
 	public void start(){
-		System.out.print("Game Started!")
+		System.out.print("Game Started!");
 		getCurrentState();
 
 		while(!isGameOver()){
