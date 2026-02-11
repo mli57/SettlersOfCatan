@@ -16,14 +16,16 @@ public class Player {
 	/**
 	 * 
 	 */
-	private undef color;
+	private PlayerColor color;
 	/**
 	 * 
 	 */
-	private EMap resources;
+	private Map<ResourceType, Integer> resources;
 	/**
 	 * 
 	 */
+	private Map<BuildingType, Integer> buildings;
+
 	private Settlement Settlements;
 	/**
 	 * 
@@ -36,13 +38,32 @@ public class Player {
 	/**
 	 * 
 	 */
-	private int victoryPoints;
+	protected int victoryPoints;
+
+	public Player(PlayerColor color){
+		this.color = color;
+		this.victoryPoints = 0;
+		resources = new EnumMap<ResourceType, Integer>(ResourceType.class);
+		buildings = new EnumMap<BuildingType, Integer>(BuildingType.class);
+		for (int i = 0; i<ResourceType.values().length; i++){
+			resources.put(ResourceType.values()[i], 0);
+		}
+		buildings.put(BuildingType.ROAD, 15);
+		buildings.put(BuildingType.SETTLEMENT, 5);
+		buildings.put(BuildingType.CITY, 4);
+	}
 
 	/**
 	 * 
 	 * @param res 
 	 */
-	public void addResource(undef res) {
+	public void addResource(ResourceType res) {
+		if (res == ResourceType.NULL){
+			return;
+		}
+
+		int current = resources.get(res);
+		resources.put(res, current + 1);
 	}
 
 	/**
@@ -50,7 +71,14 @@ public class Player {
 	 * @param res 
 	 * @return 
 	 */
-	public boolean removeResource(boolean res) {
+	public boolean removeResource(ResourceType res, int amount) {
+		int current = resources.get(res);
+		if ((current - amount) < 0){
+			return false;
+		}
+
+		resources.put(res, current - amount);
+		return true;
 	}
 
 	/**
@@ -58,6 +86,10 @@ public class Player {
 	 * @return 
 	 */
 	public boolean canBuildRoad() {
+		if ((resources.get(ResourceType.WOOD)>0 && resources.get(ResourceType.BRICK)>0) && buildings.get(BuildingType.ROAD)>0) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -65,6 +97,10 @@ public class Player {
 	 * @return 
 	 */
 	public boolean canBuildSettlement() {
+		if ((resources.get(ResourceType.WOOD)>0 && resources.get(ResourceType.BRICK)>0 && resources.get(ResourceType.SHEEP)>0 && resources.get(ResourceType.WHEAT)>0) && buildings.get(BuildingType.SETTLEMENT)>0) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -72,6 +108,10 @@ public class Player {
 	 * @return 
 	 */
 	public boolean canBuildCity() {
+		if ((resources.get(ResourceType.ORE)>=3 && resources.get(ResourceType.WHEAT)>=2) && buildings.get(BuildingType.CITY)>0) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -79,5 +119,6 @@ public class Player {
 	 * @return 
 	 */
 	public int getVictoryPoints() {
+		return this.victoryPoints;
 	}
 }
