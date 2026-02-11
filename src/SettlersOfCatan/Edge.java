@@ -61,7 +61,7 @@ public class Edge {
 	}
 
 	/**
-	 * Boolean logic: two edges are adjacent iff they share exactly one node (and are not the same edge).
+	 * Boolean logic: two edges are adjacent iff they share exactly one node.
 	 */
 	public boolean isAdjacentTo(Edge other) {
 		return other != null
@@ -69,45 +69,6 @@ public class Edge {
 				&& (touches(other.nodeA) || touches(other.nodeB));
 	}
 
-	/**
-	 * Edges that share a node with this edge. Built from nodeA and nodeB edges using isAdjacentTo; no collections.
-	 */
-	public Edge[] getAdjacentEdges() {
-		Edge[] fromA = nodeA.getEdges();
-		Edge[] fromB = nodeB.getEdges();
-		int max = fromA.length + fromB.length;
-		Edge[] raw = new Edge[max];
-		int n = 0;
-
-		for (int i = 0; i < fromA.length; i++) {
-			Edge e = fromA[i];
-			if (e != this && isAdjacentTo(e) && !contains(raw, n, e)) {
-				raw[n++] = e;
-			}
-		}
-		for (int i = 0; i < fromB.length; i++) {
-			Edge e = fromB[i];
-			if (e != this && isAdjacentTo(e) && !contains(raw, n, e)) {
-				raw[n++] = e;
-			}
-		}
-
-		Edge[] out = new Edge[n];
-		for (int i = 0; i < n; i++) {
-			out[i] = raw[i];
-		}
-		return out;
-	}
-
-	/** True if arr[0..len) contains e by reference. */
-	private static boolean contains(Edge[] arr, int len, Edge e) {
-		for (int i = 0; i < len; i++) {
-			if (arr[i] == e) {
-				return true;
-			}
-		}
-		return false;
-	}
 
 	/**
 	 * Whether this edge touches the given node.
