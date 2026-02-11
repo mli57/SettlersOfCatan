@@ -5,41 +5,114 @@
 package SettlersOfCatan;
 
 /**
- * An edge between two nodes; can hold at most one Road.
+ * An edge between two nodes A and B. Each edge can hold at most one Road.
+ * Adjacency is defined by boolean logic: two edges are adjacent iff they share a node.
  */
 public class Edge {
-	/**
-	 * 
-	 */
-	private int id;
-	/**
-	 * 
-	 */
-	private Node nodeA;
-	/**
-	 * 
-	 */
-	private Node nodeB;
-	/**
-	 * 
-	 */
-	private Player occupyingPlayer;
-	/**
-	 * 
-	 */
+	private final int id;
+	private final Node nodeA;
+	private final Node nodeB;
 	private Road road;
 
-	/**
-	 * 
-	 * @return 
-	 */
-	public boolean canPlaceRoad() {
+	public Edge(int id, Node nodeA, Node nodeB) {
+		this.id = id;
+		this.nodeA = nodeA;
+		this.nodeB = nodeB;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public Node getNodeA() {
+		return nodeA;
+	}
+
+	public Node getNodeB() {
+		return nodeB;
+	}
+
+	public Road getRoad() {
+		return road;
 	}
 
 	/**
-	 * 
-	 * @return 
+	 * Set the road on this edge. Called when a player builds a road here.
 	 */
-	public Edge getAdjacentEdges() {
+	public void setRoad(Road road) {
+		this.road = road;
+	}
+
+	/**
+	 * Player who has a road on this edge, or null if none.
+	 */
+	public Player getOccupyingPlayer() {
+		if (road == null) {
+			return null;
+		}
+		return road.getOwner();
+	}
+
+	/**
+	 * Returns true if no road is on this edge (placement rules enforced by Game/Board).
+	 */
+	public boolean canPlaceRoad() {
+		return road == null;
+	}
+
+	/**
+	 * Boolean logic: two edges are adjacent iff they share exactly one node (and are not the same edge).
+	 */
+	public boolean isAdjacentTo(Edge other) {
+		return other != null
+				&& this != other
+				&& (touches(other.nodeA) || touches(other.nodeB));
+	}
+
+	/**
+	 * Edges that share a node with this edge. Built from nodeA and nodeB edges using isAdjacentTo; no collections.
+	 */
+	public Edge[] getAdjacentEdges() {
+		Edge[] fromA = nodeA.getEdges();
+		Edge[] fromB = nodeB.getEdges();
+		int max = fromA.length + fromB.length;
+		Edge[] raw = new Edge[max];
+		int n = 0;
+
+		for (int i = 0; i < fromA.length; i++) {
+			Edge e = fromA[i];
+			if (e != this && isAdjacentTo(e) && !contains(raw, n, e)) {
+				raw[n++] = e;
+			}
+		}
+		for (int i = 0; i < fromB.length; i++) {
+			Edge e = fromB[i];
+			if (e != this && isAdjacentTo(e) && !contains(raw, n, e)) {
+				raw[n++] = e;
+			}
+		}
+
+		Edge[] out = new Edge[n];
+		for (int i = 0; i < n; i++) {
+			out[i] = raw[i];
+		}
+		return out;
+	}
+
+	/** True if arr[0..len) contains e by reference. */
+	private static boolean contains(Edge[] arr, int len, Edge e) {
+		for (int i = 0; i < len; i++) {
+			if (arr[i] == e) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Whether this edge touches the given node.
+	 */
+	public boolean touches(Node node) {
+		return node != null && (node == nodeA || node == nodeB);
 	}
 }
