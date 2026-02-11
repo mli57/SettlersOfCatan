@@ -4,6 +4,13 @@
 
 package SettlersOfCatan;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import java.io.FileReader;
+import java.io.FileWriter;
 /************************************************************/
 /**
  * 
@@ -55,5 +62,15 @@ public class Board {
 	}
 
 	public void generateBoard() {
-		
+	int [][] board = {{0,0,0}, {0,1,-1}, {-1,1,0},
+						{-1,0,1},{0,-1,1},{1,-1,0},
+						{1,0,-1},{0,2,-2},{-1,2,-1},
+						{-2,2,0},{-2,1,1},{-2,0,2},
+						{-1,-1,2},{0,-2,2},{1,-2,1},
+						{2,-2,0},{2,-1,-1},{2,0,-2},
+						{1,1,-2}};
+	for (int i = 0; i < board.length; i++) {
+			Tile tile = new Tile(board[i][0], board[i][1], board[i][2], TerrainType.FOREST, 0, new Node[0], new Edge[0]);
+		}
+	}
 }
