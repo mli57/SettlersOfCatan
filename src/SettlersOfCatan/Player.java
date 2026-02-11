@@ -20,11 +20,11 @@ public class Player {
 	/**
 	 * 
 	 */
-	private Map<ResourceType, Integer> resources;
+	protected Map<ResourceType, Integer> resources;
 	/**
 	 * 
 	 */
-	private Map<BuildingType, Integer> buildings;
+	protected Map<BuildingType, Integer> buildings;
 
 	private Settlement Settlements;
 	/**
@@ -38,7 +38,7 @@ public class Player {
 	/**
 	 * 
 	 */
-	protected int victoryPoints;
+	private int victoryPoints;
 
 	public Player(PlayerColor color){
 		this.color = color;
