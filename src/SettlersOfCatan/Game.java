@@ -26,23 +26,40 @@ public class Game {
 	 */
 	private int roundCount;
 
+	public Game() {
+		this.board  = new Board();
+		this.players = new Player[PlayerColor.values().length];
+	}
+
+	public void intializePlayers(){
+		for (int i = 0;i<players.length;i++){
+			players[i] = new Player(PlayerColor.values()[i]);
+		}
+	}
+
 	/**
 	 * 
 	 */
 	private void playRound() {
+
 	}
 
 	/**
 	 * 
 	 */
 	public void playTurn() {
+
 	}
 
 	/**
 	 * 
 	 * @return 
 	 */
-	public boolean isGameOver() {
+	public boolean isGameOver(Player player) {
+		if (player.getVictoryPoints() >= 10){
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -50,11 +67,18 @@ public class Game {
 	 * @return 
 	 */
 	public Player getWinner() {
+		for (Player p: players){
+			if (isGameOver(p)){
+				return p;
+			}
+		}
+		return null;
 	}
 
 	/**
 	 * 
 	 */
 	public void getCurrentState() {
+
 	}
 }
