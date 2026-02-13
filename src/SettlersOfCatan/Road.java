@@ -26,7 +26,9 @@ public class Road {
 
 	/**
 	 * Length of longest continuous road through this road (computed by Board/Game).
+	 * Not implemented yet - returns 0.
 	 */
 	public int getLongestRoadCount() {
+		return 0;
 	}
 }

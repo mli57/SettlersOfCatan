@@ -13,5 +13,5 @@ public enum ResourceType {
 	WHEAT,
 	BRICK,
 	ORE,
-	DESERT
+	NULL  // No resource (e.g. desert)
 }

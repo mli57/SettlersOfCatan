@@ -4,19 +4,18 @@
 
 package SettlersOfCatan;
 
+import java.util.Random;
+
 /************************************************************/
 /**
- * 
+ * Rolls dice for the game.
  */
 public class DiceRoller {
 	/**
-	 * 
 	 * @param sides 
 	 * @return the sum of two dice
 	 */
-
-	private final Random random;
-
+	private final Random random = new Random();
 
 	public int rollTwoDice(int sides) {
 		return roll(sides) + roll(sides);
