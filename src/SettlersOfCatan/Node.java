@@ -150,6 +150,22 @@ public class Node {
 	}
 
 	/**
+	 * Places an initial settlement during setup (no resource cost).
+	 * Returns true if placement succeeded.
+	 */
+	public boolean placeInitialSettlement(Player player) {
+		if (!canPlaceBuilding() || player == null) {
+			return false;
+		}
+		// Consume one settlement piece (no resources are paid)
+		player.useSettlementPiece();
+		this.building = new Settlement(player);
+		this.occupyingPlayer = player;
+		player.addVictoryPoint(1);
+		return true;
+	}
+
+	/**
 	 * Places a settlement at the node for the given player, if rules allow.
 	 * Returns true if placement succeeded.
 	 */
