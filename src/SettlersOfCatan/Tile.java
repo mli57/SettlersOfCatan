@@ -13,19 +13,17 @@ public class Tile {
 	private final int r;
 	private final TerrainType terrain;
 	private final int number;  // dice number 2-12 (0 for desert)
-	private final Node[] nodes;
-	private final Edge[] edges;
+	// private final Node[] nodes;
+	// private final Edge[] edges;
 
-	public Tile(int q, int s, int r, TerrainType terrain, int number, Node[] nodes, Edge[] edges) {
+	public Tile(int q, int s, int r, TerrainType terrain, int number) {
 		this.q = q;
 		this.s = s;
 		this.r = r;
 		this.terrain = terrain;
 		this.number = number;
-		if (nodes == null) nodes = new Node[0];
-		if (edges == null) edges = new Edge[0];
-		this.nodes = nodes;
-		this.edges = edges;
+
+
 	}
 
 	public int getQ(){

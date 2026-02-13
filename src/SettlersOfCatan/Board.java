@@ -4,13 +4,7 @@
 
 package SettlersOfCatan;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.util.Random;
 /************************************************************/
 /**
  * 
@@ -19,7 +13,7 @@ public class Board {
 	/**
 	 * 
 	 */
-	private Tile[] tile;
+	private Tile[] tiles;
 	/**
 	 * 
 	 */
@@ -28,6 +22,10 @@ public class Board {
 	 * 
 	 */
 	private Edge[] edges;
+	/**
+	 * Random number generator for board generation
+	 */
+	private Random random = new Random();
 
 	/**
 	 * 
@@ -62,15 +60,48 @@ public class Board {
 	}
 
 	public void generateBoard() {
-	int [][] board = {{0,0,0}, {0,1,-1}, {-1,1,0},
+
+		int [] maxTerrainCount = {4,4,4,3,3,1};
+		int [] terrainCount = {0,0,0,0,0,0};
+
+		// Token distribution: 2(1), 3(2), 4(2), 5(2), 6(2), 8(2), 9(2), 10(2), 11(2), 12(1)
+		// Total: 18 tokens for 18 non-desert tiles
+		int [] maxTokenCount = {0, 1, 2, 2, 2, 2, 0, 2, 2, 2, 2, 1}; // indices 0-11 represent numbers 1-12
+		int [] tokenCount = {0,0,0,0,0,0,0,0,0,0,0,0};
+
+		tiles = new Tile[19];
+		int randomTerrain;
+		int tileNum = 0;
+		int [][] boardCoords = {{0,0,0}, {0,1,-1}, {-1,1,0},
 						{-1,0,1},{0,-1,1},{1,-1,0},
 						{1,0,-1},{0,2,-2},{-1,2,-1},
 						{-2,2,0},{-2,1,1},{-2,0,2},
 						{-1,-1,2},{0,-2,2},{1,-2,1},
 						{2,-2,0},{2,-1,-1},{2,0,-2},
 						{1,1,-2}};
-	for (int i = 0; i < board.length; i++) {
-			Tile tile = new Tile(board[i][0], board[i][1], board[i][2], TerrainType.FOREST, 0, new Node[0], new Edge[0]);
+		
+		while (tileNum < 19) {
+			randomTerrain = random.nextInt(6);
+
+			if (terrainCount[randomTerrain] < maxTerrainCount[randomTerrain]) {
+				terrainCount[randomTerrain]++;
+				TerrainType terrain = TerrainType.values()[randomTerrain];
+				int tokenNumber = 0;
+				
+				// Assign token number if not desert
+				if (terrain != TerrainType.DESERT) {
+					int randomToken;
+					do {
+						randomToken = random.nextInt(12) + 1; // numbers 1-12
+					} while (tokenCount[randomToken - 1] >= maxTokenCount[randomToken - 1]);
+					
+					tokenCount[randomToken - 1]++;
+					tokenNumber = randomToken;
+				}
+				
+				tiles[tileNum] = new Tile(boardCoords[tileNum][0], boardCoords[tileNum][1], boardCoords[tileNum][2], terrain, tokenNumber);
+				tileNum++;
+			}
 		}
 	}
 }

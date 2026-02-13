@@ -9,9 +9,9 @@ package SettlersOfCatan;
  */
 public enum ResourceType {
 	WOOD,
-	BRICK,
 	SHEEP,
 	WHEAT,
+	BRICK,
 	ORE,
-	NULL
+	DESERT
 }
