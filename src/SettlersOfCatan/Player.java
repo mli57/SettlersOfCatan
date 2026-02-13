@@ -115,6 +115,58 @@ public class Player {
 	}
 
 	/**
+	 * Pays resources and consumes a settlement piece.
+	 * Does not check canBuildSettlement(); call that first.
+	 * @return true if payment succeeded
+	 */
+	public boolean payForSettlement() {
+		if (!canBuildSettlement()) {
+			return false;
+		}
+
+		// Spend 1 of each: WOOD, BRICK, SHEEP, WHEAT
+		removeResource(ResourceType.WOOD, 1);
+		removeResource(ResourceType.BRICK, 1);
+		removeResource(ResourceType.SHEEP, 1);
+		removeResource(ResourceType.WHEAT, 1);
+
+		// Consume one settlement piece
+		buildings.put(
+			BuildingType.SETTLEMENT,
+			buildings.get(BuildingType.SETTLEMENT) - 1
+		);
+
+		// +1 victory point for a new settlement
+		this.victoryPoints += 1;
+		return true;
+	}
+
+	/**
+	 * Pays resources and consumes a city piece, upgrading an existing settlement.
+	 * Does not check canBuildCity(); call that first.
+	 * @return true if payment succeeded
+	 */
+	public boolean payForCityUpgrade() {
+		if (!canBuildCity()) {
+			return false;
+		}
+
+		// Spend 3 ore and 2 wheat
+		removeResource(ResourceType.ORE, 3);
+		removeResource(ResourceType.WHEAT, 2);
+
+		// Consume one city piece, effectively upgrading one settlement
+		buildings.put(
+			BuildingType.CITY,
+			buildings.get(BuildingType.CITY) - 1
+		);
+
+		// Net +1 victory point (settlement 1 -> city 2)
+		this.victoryPoints += 1;
+		return true;
+	}
+
+	/**
 	 * 
 	 * @return 
 	 */

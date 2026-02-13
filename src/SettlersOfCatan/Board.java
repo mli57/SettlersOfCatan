@@ -23,7 +23,6 @@ public class Board {
 	 */
 	private Edge[] edges;
 
-	private final DiceRoller Die = new DiceRoller();
 	/**
 	 * Random number generator for board generation
 	 */
@@ -37,7 +36,10 @@ public class Board {
 	 * @return 
 	 */
 	public Tile getTile(int q, int s, int r) {
-		for (Tile tile : )
+		for (Tile tile : tiles){
+
+			if (tile.getQ == q )
+		}
 	}
 
 	/**
@@ -56,13 +58,7 @@ public class Board {
 	public Edge getEdge() {
 	}
 
-	/**
-	 * 
-	 * @param number 
-	 */
-	public void rollDice(int number) {
-		Die.rollTwoDice(6);
-	}
+
 
 	public void generateBoard() {
 

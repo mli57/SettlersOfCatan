@@ -111,8 +111,8 @@ public class Node {
 	/**
 	 * Adds an adjacent node if there is no node next to the current node
 	 */
-	public void addAdjacentNode(){
-		if(!adjacentNodes.contains(node)){
+	public void addAdjacentNode(Node node){
+		if(node != null && !adjacentNodes.contains(node)){
 			adjacentNodes.add(node);
 		}
 	}
@@ -120,8 +120,8 @@ public class Node {
 	/**
 	 * Adds an ajacent tile if there is no tile next to the current tile
 	 */
-	public void addAdjacentTile(){
-		if(!adjacentTiles.contains(tile)){
+	public void addAdjacentTile(Tile tile){
+		if(tile != null && !adjacentTiles.contains(tile)){
 			adjacentTiles.add(tile);
 		}
 	}
@@ -150,23 +150,52 @@ public class Node {
 	}
 
 	/**
-	 * Places a settlement at the node for the given player
+	 * Places a settlement at the node for the given player, if rules allow.
+	 * Returns true if placement succeeded.
 	 */
-	public void placeSettlement(){
-		this.building = Building.SETTLEMENT;
+	public boolean placeSettlement(Player player){
+		// Check distance rule + empty
+		if (!canPlaceBuilding()) {
+			return false;
+		}
+
+		// Check player has resources & pieces
+		if (player == null || !player.canBuildSettlement()) {
+			return false;
+		}
+
+		// Let the player pay for the settlement (resources, inventory, VPs)
+		if (!player.payForSettlement()) {
+			return false;
+		}
+
+		this.building = new Settlement(player);
 		this.occupyingPlayer = player;
+		return true;
 	}
 
 	/**
-	 * Upgrades a settlement to a city, if the settlement exists
-	 * @return
+	 * Upgrades a settlement to a city for the given player, if rules allow.
+	 * Returns true if upgrade succeeded.
 	 */
-	public boolean upgradeToCity(){
-		if(building == Building.SETTLEMENT){
-			building = Building.CITY;
-			return true;
+	public boolean upgradeToCity(Player player){
+		// Must already have a settlement owned by this player
+		if (!(building instanceof Settlement) || building.getOwner() != player) {
+			return false;
 		}
-		return false;
+
+		// Check player can afford the city upgrade
+		if (player == null || !player.canBuildCity()) {
+			return false;
+		}
+
+		if (!player.payForCityUpgrade()) {
+			return false;
+		}
+
+		this.building = new City(player);
+		this.occupyingPlayer = player;
+		return true;
 	}
 
 	/**
