@@ -173,4 +173,22 @@ public class Player {
 	public int getVictoryPoints() {
 		return this.victoryPoints;
 	}
+
+	/**
+	 * Uses one settlement piece without paying resources (for initial setup).
+	 */
+	public void useSettlementPiece() {
+		buildings.put(
+			BuildingType.SETTLEMENT,
+			buildings.get(BuildingType.SETTLEMENT) - 1
+		);
+	}
+
+	/**
+	 * Adds victory points to the player.
+	 * @param points The number of victory points to add
+	 */
+	public void addVictoryPoint(int points) {
+		this.victoryPoints += points;
+	}
 }

@@ -65,6 +65,8 @@ public class Tile {
 			  return ResourceType.ORE;
 		  case DESERT:
 			  return ResourceType.NULL;
+		  default:
+			  return ResourceType.NULL;
 		}
-	  }
+	}
 }

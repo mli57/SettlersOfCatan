@@ -15,6 +15,14 @@ public class Game {
 	 * 
 	 */
 	private Board board;
+
+	/**
+	 * Gets the game board.
+	 * @return the board
+	 */
+	public Board getBoard() {
+		return board;
+	}
 	/**
 	 * 
 	 */
@@ -85,12 +93,6 @@ public class Game {
 				placed = true;
 			}
 		}
-	}
-
-	public static void main(String[] args) {
-		Game game = new Game();
-		game.intializePlayers();
-		game.setupInitialSettlements();
 	}
 
 	/**
