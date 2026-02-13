@@ -202,7 +202,7 @@ public class Game {
      * - Board state
 	 */
 	public void getCurrentState() {
-		System.out.println("====================================")
+		System.out.println("====================================");
 		System.out.println("GAME STATE - Round" + roundCount);
 		System.out.println("Current Player: Player" + (currentPlayer + 1));
 		System.out.println("Player Standings: ");
