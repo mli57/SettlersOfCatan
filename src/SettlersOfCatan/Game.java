@@ -4,6 +4,8 @@
 
 package SettlersOfCatan;
 
+import java.util.Scanner;
+
 /************************************************************/
 /**
  * 
@@ -28,13 +30,67 @@ public class Game {
 
 	public Game() {
 		this.board  = new Board();
-		this.players = new Player[PlayerColor.values().length];
+		// For now, support exactly 2 players
+		this.players = new Player[2];
+		// Generate the board immediately
+		this.board.generateBoard();
 	}
 
 	public void intializePlayers(){
 		for (int i = 0;i<players.length;i++){
 			players[i] = new Player(PlayerColor.values()[i]);
 		}
+	}
+
+	/**
+	 * Setup phase: each of the 2 players places their first settlement.
+	 * Input is taken from the console as a node id (0-53).
+	 */
+	public void setupInitialSettlements() {
+		Scanner scanner = new Scanner(System.in);
+
+		for (int i = 0; i < players.length; i++) {
+			Player player = players[i];
+
+			// Give just enough resources to pay for one settlement
+			player.addResource(ResourceType.WOOD);
+			player.addResource(ResourceType.BRICK);
+			player.addResource(ResourceType.SHEEP);
+			player.addResource(ResourceType.WHEAT);
+
+			boolean placed = false;
+			while (!placed) {
+				System.out.println("Player " + (i + 1) + " - choose a node id (0-53) for your first settlement:");
+
+				int nodeId;
+				try {
+					nodeId = Integer.parseInt(scanner.nextLine());
+				} catch (NumberFormatException e) {
+					System.out.println("Please enter a valid integer node id.");
+					continue;
+				}
+
+				Node node = board.getNode(nodeId);
+				if (node == null) {
+					System.out.println("Invalid node id. Must be between 0 and 53.");
+					continue;
+				}
+
+				if (!node.placeSettlement(player)) {
+					System.out.println("Cannot place settlement on that node (distance rule, occupied, or not enough resources). Choose another.");
+					continue;
+				}
+
+				System.out.println("Settlement placed on node " + nodeId + " for Player " + (i + 1) + ".");
+				placed = true;
+			}
+		}
+	}
+
+	public static void main(String[] args) {
+		Game game = new Game();
+		game.intializePlayers();
+		game.setupInitialSettlements();
 	}
 
 	/**

@@ -36,10 +36,15 @@ public class Board {
 	 * @return 
 	 */
 	public Tile getTile(int q, int s, int r) {
-		for (Tile tile : tiles){
-
-			if (tile.getQ == q )
+		if (tiles == null) {
+			return null;
 		}
+		for (Tile tile : tiles){
+			if (tile.getQ() == q && tile.getS() == s && tile.getR() == r){
+				return tile;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -48,7 +53,10 @@ public class Board {
 	 * @return 
 	 */
 	public Node getNode(int id) {
-
+		if (nodes == null || id < 0 || id >= nodes.length) {
+			return null;
+		}
+		return nodes[id];
 	}
 
 	/**
@@ -56,9 +64,9 @@ public class Board {
 	 * @return 
 	 */
 	public Edge getEdge() {
+		// Edges are not yet fully modelled; return null for now.
+		return null;
 	}
-
-
 
 	public void generateBoard() {
 
@@ -71,6 +79,11 @@ public class Board {
 		int [] tokenCount = {0,0,0,0,0,0,0,0,0,0,0,0};
 
 		tiles = new Tile[19];
+		// Create all nodes up front (54 intersections)
+		nodes = new Node[54];
+		for (int i = 0; i < 54; i++) {
+			nodes[i] = new Node(i);
+		}
 		int randomTerrain;
 		int tileNum = 0;
 		int[][] tileNodes = {
