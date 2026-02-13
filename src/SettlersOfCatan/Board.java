@@ -22,6 +22,8 @@ public class Board {
 	 * 
 	 */
 	private Edge[] edges;
+
+	private final DiceRoller Die = new DiceRoller();
 	/**
 	 * Random number generator for board generation
 	 */
@@ -35,6 +37,7 @@ public class Board {
 	 * @return 
 	 */
 	public Tile getTile(int q, int s, int r) {
+		for (Tile tile : )
 	}
 
 	/**
@@ -43,6 +46,7 @@ public class Board {
 	 * @return 
 	 */
 	public Node getNode(int id) {
+
 	}
 
 	/**
@@ -57,6 +61,7 @@ public class Board {
 	 * @param number 
 	 */
 	public void rollDice(int number) {
+		Die.rollTwoDice(6);
 	}
 
 	public void generateBoard() {
@@ -72,13 +77,35 @@ public class Board {
 		tiles = new Tile[19];
 		int randomTerrain;
 		int tileNum = 0;
+		int[][] tileNodes = {
+			{ 0,  1,  2,  3,  4,  5},  // Tile  0
+			{ 6,  7,  8,  9,  2,  1},  // Tile  1
+			{ 2,  9, 10, 11, 12,  3},  // Tile  2
+			{ 4,  3, 12, 13, 14, 15},  // Tile  3
+			{16,  5,  4, 15, 17, 18},  // Tile  4
+			{19, 20,  0,  5, 16, 21},  // Tile  5
+			{22, 23,  6,  1,  0, 20},  // Tile  6
+			{24, 25, 26, 27,  8,  7},  // Tile  7
+			{ 8, 27, 28, 29, 10,  9},  // Tile  8
+			{10, 29, 30, 31, 32, 11},  // Tile  9
+			{12, 11, 32, 33, 34, 13},  // Tile 10
+			{14, 13, 34, 35, 36, 37},  // Tile 11
+			{17, 15, 14, 37, 38, 39},  // Tile 12
+			{40, 18, 17, 39, 41, 42},  // Tile 13
+			{43, 21, 16, 18, 40, 44},  // Tile 14
+			{45, 46, 19, 21, 43, 47},  // Tile 15
+			{48, 49, 22, 20, 19, 46},  // Tile 16
+			{50, 51, 52, 23, 22, 49},  // Tile 17
+			{52, 53, 24,  7,  6, 23}   // Tile 18
+		};
+
 		int [][] boardCoords = {{0,0,0}, {0,1,-1}, {-1,1,0},
-						{-1,0,1},{0,-1,1},{1,-1,0},
-						{1,0,-1},{0,2,-2},{-1,2,-1},
-						{-2,2,0},{-2,1,1},{-2,0,2},
-						{-1,-1,2},{0,-2,2},{1,-2,1},
-						{2,-2,0},{2,-1,-1},{2,0,-2},
-						{1,1,-2}};
+								{-1,0,1},{0,-1,1},{1,-1,0},
+								{1,0,-1},{0,2,-2},{-1,2,-1},
+								{-2,2,0},{-2,1,1},{-2,0,2},
+								{-1,-1,2},{0,-2,2},{1,-2,1},
+								{2,-2,0},{2,-1,-1},{2,0,-2},
+								{1,1,-2}};
 		
 		while (tileNum < 19) {
 			randomTerrain = random.nextInt(6);
@@ -99,7 +126,7 @@ public class Board {
 					tokenNumber = randomToken;
 				}
 				
-				tiles[tileNum] = new Tile(boardCoords[tileNum][0], boardCoords[tileNum][1], boardCoords[tileNum][2], terrain, tokenNumber);
+				tiles[tileNum] = new Tile(boardCoords[tileNum][0], boardCoords[tileNum][1], boardCoords[tileNum][2], terrain, tokenNumber, tileNodes[tileNum]);
 				tileNum++;
 			}
 		}

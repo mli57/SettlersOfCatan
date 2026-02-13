@@ -11,15 +11,15 @@ package SettlersOfCatan;
 public class DiceRoller {
 	/**
 	 * 
-	 * @param rollTwoDice 
+	 * @param sides 
 	 * @return the sum of two dice
 	 */
 
 	private final Random random;
 
 
-	public int rollTwoDice(int rollTwoDice) {
-		return roll(6) + roll(6);
+	public int rollTwoDice(int sides) {
+		return roll(sides) + roll(sides);
 	}
 
 	/**

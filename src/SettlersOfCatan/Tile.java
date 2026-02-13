@@ -4,6 +4,8 @@
 
 package SettlersOfCatan;
 
+import java.util.ArrayList;
+
 /**
  * A hex tile on the board. Produces a resource when corresponding number is rolled (except Desert).
  */
@@ -13,17 +15,20 @@ public class Tile {
 	private final int r;
 	private final TerrainType terrain;
 	private final int number;  // dice number 2-12 (0 for desert)
+	private final Node[] nodes = new ArrayList<Node>(6);
 	// private final Node[] nodes;
 	// private final Edge[] edges;
 
-	public Tile(int q, int s, int r, TerrainType terrain, int number) {
+	public Tile(int q, int s, int r, TerrainType terrain, int number,int[] nodeIds) {
 		this.q = q;
 		this.s = s;
 		this.r = r;
 		this.terrain = terrain;
 		this.number = number;
 
-
+		for (int i = 0; i<=5; i++){
+			nodes[i] = new Node(nodeIds[i]);
+		}
 	}
 
 	public int getQ(){
