@@ -6,14 +6,23 @@ import java.util.Random;
  * Generates a random Catan board with terrain and token distribution.
  * SOLID: Single Responsibility - only handles board generation.
  * GRASP: Pure Fabrication - creates board structure.
+ * @author Kabir Singh Sachdeva, Adrian Najmi, Sarthak Kulashari, Maxwell Li
  */
 public class RandomBoardGenerator implements IBoardGenerator {
+	/** Random number generator for board generation **/
 	private final Random random;
 
+	/**
+	 * Constructor with default random seed.
+	 */
 	public RandomBoardGenerator() {
 		this.random = new Random();
 	}
 
+	/**
+	 * Constructor with specified random seed for reproducible boards.
+	 * @param seed The random seed
+	 */
 	public RandomBoardGenerator(long seed) {
 		this.random = new Random(seed);
 	}

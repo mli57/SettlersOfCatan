@@ -5,9 +5,14 @@ import java.io.IOException;
 /**
  * Demonstrator class that runs a sample Catan simulation.
  * This demonstrates the key functionality of the simulator.
+ * @author Kabir Singh Sachdeva, Adrian Najmi, Sarthak Kulashari, Maxwell Li
  */
 public class Demonstrator {
     
+    /**
+     * Main method to run the Catan game simulation.
+     * @param args Command line arguments (unused)
+     */
     public static void main(String[] args) {
         try {
             // Step 1: Read configuration
@@ -39,10 +44,12 @@ public class Demonstrator {
             game.startGame(maxRounds);
             
         } catch (IOException e) {
+            // Handle file reading errors
             System.err.println("ERROR: Could not read game.config file");
             System.err.println("Details: " + e.getMessage());
             System.err.println("Make sure game.config exists with format: turns: <number>");
         } catch (IllegalArgumentException e) {
+            // Handle invalid configuration values
             System.err.println("ERROR: Invalid configuration");
             System.err.println("Details: " + e.getMessage());
         }

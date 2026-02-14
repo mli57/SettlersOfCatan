@@ -2,6 +2,7 @@ package SettlersOfCatan;
 
 /**
  * Interface for dice rolling functionality.
+ * @author Kabir Singh Sachdeva, Adrian Najmi, Sarthak Kulashari, Maxwell Li
  */
 public interface Dice {
 	/**

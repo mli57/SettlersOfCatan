@@ -2,6 +2,7 @@ package SettlersOfCatan;
 
 /**
  * Interface for validating placement rules.
+ * @author Kabir Singh Sachdeva, Adrian Najmi, Sarthak Kulashari, Maxwell Li
  */
 public interface IPlacementValidator {
 	/**

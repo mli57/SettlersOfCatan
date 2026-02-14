@@ -3,6 +3,7 @@ package SettlersOfCatan;
 /**
  * Validates placement rules for buildings and roads.
  * SOLID: Single Responsibility - only handles rule validation.
+ * @author Kabir Singh Sachdeva, Adrian Najmi, Sarthak Kulashari, Maxwell Li
  */
 public class PlacementValidator implements IPlacementValidator {
 

@@ -2,6 +2,7 @@ package SettlersOfCatan;
 
 /**
  * Interface for board generation strategies.
+ * @author Kabir Singh Sachdeva, Adrian Najmi, Sarthak Kulashari, Maxwell Li
  */
 public interface IBoardGenerator {
 	/**
