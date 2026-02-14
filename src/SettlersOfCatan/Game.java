@@ -58,6 +58,12 @@ public class Game {
 	 */
 	private Random random;
 
+	// Game constants
+	private static final int VICTORY_POINTS_TO_WIN = 10;
+	private static final int MAX_RESOURCES_BEFORE_BUILD = 7;
+	private static final int DICE_SIDES = 6;
+	private static final int TOTAL_NODES = 54;
+
 	/**
 	 * Constructor with dependency injection.
 	 */
@@ -92,7 +98,7 @@ public class Game {
 
 		for (int i = 0; i < players.length; i++) {
 			Player player = players[i];
-			System.out.println("\n=== Player " + (i + 1) + " Setup ===");
+			System.out.println("\n=== " + player.getColor() + " Player Setup ===");
 
 			// Place first settlement
 			placeSettlement(player, i, 1);
@@ -118,7 +124,7 @@ public class Game {
 		List<Integer> availableNodes = getAvailableSettlementNodes();
 		
 		if (availableNodes.isEmpty()) {
-			System.out.println("Player " + (playerIndex + 1) + " - No available nodes for settlement #" + settlementNumber);
+			System.out.println(player.getColor() + " - No available nodes for settlement #" + settlementNumber);
 			return;
 		}
 		
@@ -127,7 +133,7 @@ public class Game {
 		Node node = board.getNode(nodeId);
 		
 		if (node != null && placeSettlementSetup(node, player)) {
-			System.out.println("Player " + (playerIndex + 1) + " placed settlement #" + settlementNumber + " on node " + nodeId);
+			System.out.println(roundCount + " / " + player.getColor() + ": Placed settlement #" + settlementNumber + " on node " + nodeId);
 		}
 
 	}
@@ -141,7 +147,7 @@ public class Game {
 		List<Integer> occupiedNodes = getOccupiedNodeIds(player);
 		
 		if (occupiedNodes.isEmpty()) {
-			System.out.println("Player " + (playerIndex + 1) + " - No settlements to build roads from");
+			System.out.println(player.getColor() + " - No settlements to build roads from");
 			return;
 		}
 		
@@ -166,7 +172,7 @@ public class Game {
 		}
 		
 		if (adjacentUnoccupied.isEmpty()) {
-			System.out.println("Player " + (playerIndex + 1) + " - No available adjacent nodes for road #" + roadNumber);
+			System.out.println(player.getColor() + " - No available adjacent nodes for road #" + roadNumber);
 			return;
 		}
 		
@@ -176,7 +182,7 @@ public class Game {
 		// Find the edge between the two nodes
 		Edge edge = board.findEdge(firstNodeId, secondNodeId);
 		if (edge != null && placeRoadSetup(edge, player)) {
-			System.out.println("Player " + (playerIndex + 1) + " placed road #" + roadNumber + " connecting node " + firstNodeId + " to node " + secondNodeId);
+			System.out.println(roundCount + " / " + player.getColor() + ": Placed road #" + roadNumber + " from node " + firstNodeId + " to node " + secondNodeId);
 		}
 
 	}
@@ -185,12 +191,35 @@ public class Game {
 	 * Starts the game. First sets up initial settlements, then runs the game loop.
 	 */
 	public void startGame() {
+		startGame(Integer.MAX_VALUE);
+	}
+
+	/**
+	 * Starts the game with a maximum round limit.
+	 * @param maxRounds maximum number of rounds to play
+	 */
+	public void startGame(int maxRounds) {
 		setupInitialSettlements();
 		
 		System.out.println("\n=== GAME START ===");
 		
-		// Game loop - continue until someone wins
+		// Game loop - continue until someone wins or max rounds reached
 		while (getWinner() == null) {
+			// Check if we've reached max rounds before starting this round
+			if (roundCount >= maxRounds) {
+				System.out.println("\n=== GAME OVER ===");
+				System.out.println("Maximum rounds (" + maxRounds + ") reached!");
+				// Find player with most victory points
+				Player winner = players[0];
+				for (int i = 1; i < players.length; i++) {
+					if (players[i].getVictoryPoints() > winner.getVictoryPoints()) {
+						winner = players[i];
+					}
+				}
+				System.out.println(winner.getColor() + " Player wins with " + winner.getVictoryPoints() + " victory points!");
+				return;
+			}
+			
 			// Process each player's turn in this round
 			for (int i = 0; i < players.length; i++) {
 				currentPlayer = i;
@@ -201,12 +230,11 @@ public class Game {
 					break;
 				}
 				
-				System.out.println("\n--- Player " + (i + 1) + "'s Turn ---");
+				System.out.println("\n--- " + player.getColor() + " Player's Turn ---");
 				
 				// Roll dice for this turn
-				int diceRoll = dice.rollTwoDice(6);
+				int diceRoll = dice.rollTwoDice(DICE_SIDES);
 				System.out.println("Dice roll: " + diceRoll);
-				// Dice rolled successfully
 				
 		// Distribute resources to all players
 		distributeResources(diceRoll);
@@ -217,15 +245,23 @@ public class Game {
 		// End of turn processing
 			}
 			
-			// Increment round counter
+			// Print victory points at end of round (R1.7 requirement)
+			System.out.println("\n=== End of Round " + roundCount + " - Victory Points ===");
+			for (int i = 0; i < players.length; i++) {
+				System.out.println(players[i].getColor() + " Player: " + players[i].getVictoryPoints() + " VP");
+			}
+			System.out.println();
+			
+			// Increment round counter after all players have taken their turn
 			roundCount++;
 		}
 		
 		// Game over - determine winner
 		Player winner = getWinner();
-		int winnerNum = getPlayerNumber(winner) + 1;
-		System.out.println("\n=== GAME OVER ===");
-		System.out.println("Player " + winnerNum + " wins with " + winner.getVictoryPoints() + " victory points!");
+		if (winner != null) {
+			System.out.println("\n=== GAME OVER ===");
+			System.out.println(winner.getColor() + " Player wins with " + winner.getVictoryPoints() + " victory points!");
+		}
 	}
 
 	/**
@@ -237,13 +273,13 @@ public class Game {
 		int totalResources = getTotalResourceCount(player);
 		
 		// If player has 7+ resources, must build something
-		boolean mustBuild = totalResources >= 7;
+		boolean mustBuild = totalResources >= MAX_RESOURCES_BEFORE_BUILD;
 		
 		// Get available actions
 		List<String> availableActions = getAvailableActions(player, mustBuild);
 		
 		if (availableActions.isEmpty()) {
-			System.out.println("Player " + (playerIndex + 1) + " - No available actions");
+			System.out.println(player.getColor() + " - No available actions");
 			return;
 		}
 		
@@ -261,7 +297,7 @@ public class Game {
 				buildRoad(player, playerIndex);
 				break;
 			case "PASS":
-				System.out.println("Player " + (playerIndex + 1) + " passes");
+				System.out.println(roundCount + " / " + player.getColor() + ": Pass");
 				break;
 		}
 
@@ -306,7 +342,7 @@ public class Game {
 		List<Integer> availableNodes = getAvailableSettlementNodesForPlayer(player);
 		
 		if (availableNodes.isEmpty()) {
-			System.out.println("Player " + (playerIndex + 1) + " - Cannot build settlement (no valid locations)");
+			System.out.println(player.getColor() + " - Cannot build settlement (no valid locations)");
 			return;
 		}
 		
@@ -314,9 +350,9 @@ public class Game {
 		Node node = board.getNode(nodeId);
 		
 		if (node != null && placeSettlement(node, player)) {
-			System.out.println("Player " + (playerIndex + 1) + " built settlement on node " + nodeId);
+			System.out.println(roundCount + " / " + player.getColor() + ": Built settlement on node " + nodeId);
 		} else {
-			System.out.println("Player " + (playerIndex + 1) + " - Failed to build settlement");
+			System.out.println(roundCount + " / " + player.getColor() + ": Failed to build settlement");
 		}
 
 	}
@@ -329,7 +365,7 @@ public class Game {
 		List<Integer> upgradeableNodes = getUpgradeableCityNodes(player);
 		
 		if (upgradeableNodes.isEmpty()) {
-			System.out.println("Player " + (playerIndex + 1) + " - Cannot build city (no settlements to upgrade)");
+			System.out.println(player.getColor() + " - Cannot build city (no settlements to upgrade)");
 			return;
 		}
 		
@@ -337,9 +373,9 @@ public class Game {
 		Node node = board.getNode(nodeId);
 		
 		if (node != null && placeCity(node, player)) {
-			System.out.println("Player " + (playerIndex + 1) + " built city on node " + nodeId);
+			System.out.println(roundCount + " / " + player.getColor() + ": Built city on node " + nodeId);
 		} else {
-			System.out.println("Player " + (playerIndex + 1) + " - Failed to build city");
+			System.out.println(roundCount + " / " + player.getColor() + ": Failed to build city");
 		}
 
 	}
@@ -352,16 +388,16 @@ public class Game {
 		List<Edge> availableEdges = getAvailableRoadEdgesForPlayer(player);
 		
 		if (availableEdges.isEmpty()) {
-			System.out.println("Player " + (playerIndex + 1) + " - Cannot build road (no valid locations)");
+			System.out.println(player.getColor() + " - Cannot build road (no valid locations)");
 			return;
 		}
 		
 		Edge edge = availableEdges.get(random.nextInt(availableEdges.size()));
 		
 		if (placeRoad(edge, player)) {
-			System.out.println("Player " + (playerIndex + 1) + " built road on edge " + edge.getId());
+			System.out.println(roundCount + " / " + player.getColor() + ": Built road on edge " + edge.getId());
 		} else {
-			System.out.println("Player " + (playerIndex + 1) + " - Failed to build road");
+			System.out.println(roundCount + " / " + player.getColor() + ": Failed to build road");
 		}
 
 	}
@@ -404,9 +440,9 @@ public class Game {
 								owner.addResource(resource);
 							}
 							if (amount > 1) {
-								System.out.println("Player " + (getPlayerNumber(owner) + 1) + " received 2x " + resource);
+								System.out.println(roundCount + " / " + owner.getColor() + ": Received 2x " + resource);
 							} else {
-								System.out.println("Player " + (getPlayerNumber(owner) + 1) + " received " + resource);
+								System.out.println(roundCount + " / " + owner.getColor() + ": Received " + resource);
 							}
 						}
 					}
@@ -420,18 +456,16 @@ public class Game {
 	 * Gets all available nodes for settlement placement (setup phase - distance rule only).
 	 */
 	private List<Integer> getAvailableSettlementNodes() {
-
 		List<Integer> available = new ArrayList<>();
 		
-		for (int i = 0; i < 54; i++) {
+		for (int i = 0; i < TOTAL_NODES; i++) {
 			Node node = board.getNode(i);
-			if (node != null && validator.canPlaceSettlement(node, null, true)) {
+			if (node != null && node.canPlaceBuilding()) {
 				available.add(i);
 			}
 		}
 		
 		return available;
-
 	}
 
 	/**
@@ -441,7 +475,7 @@ public class Game {
 
 		List<Integer> available = new ArrayList<>();
 		
-		for (int i = 0; i < 54; i++) {
+		for (int i = 0; i < TOTAL_NODES; i++) {
 			Node node = board.getNode(i);
 			if (node != null && validator.canPlaceSettlement(node, player, false) && player.canBuildSettlement()) {
 
@@ -470,7 +504,7 @@ public class Game {
 
 		List<Integer> upgradeable = new ArrayList<>();
 		
-		for (int i = 0; i < 54; i++) {
+		for (int i = 0; i < TOTAL_NODES; i++) {
 			Node node = board.getNode(i);
 			if (node != null && validator.canPlaceCity(node, player) && player.canBuildCity()) {
 				upgradeable.add(i);
@@ -543,7 +577,7 @@ public class Game {
 
 		List<Integer> occupied = new ArrayList<>();
 		
-		for (int i = 0; i < 54; i++) {
+		for (int i = 0; i < TOTAL_NODES; i++) {
 			Node node = board.getNode(i);
 			if (node != null && node.isOccupied() && node.getOccupyingPlayer() == player) {
 				occupied.add(i);
@@ -591,7 +625,7 @@ public class Game {
 	 * @return 
 	 */
 	public boolean isGameOver(Player player) {
-		if (player.getVictoryPoints() >= 10){
+		if (player.getVictoryPoints() >= VICTORY_POINTS_TO_WIN){
 			return true;
 		}
 		return false;

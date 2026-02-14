@@ -6,7 +6,7 @@ import java.io.IOException;
 
 public class ConfigReader {
 
-    private static final String configFile = "game.config";
+    private static final String configFile = "src/SettlersOfCatan/game.config";
     private static final int minTurns = 1;
     private static final int maxTurns = 8192;
 

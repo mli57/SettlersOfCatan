@@ -159,10 +159,22 @@ public class RandomBoardGenerator implements IBoardGenerator {
 					Node nodeB = nodes[nodeIdB];
 					Edge newEdge = new Edge(edgeId++, nodeA, nodeB);
 					edges[edgeCount++] = newEdge;
+					
+					// Set up node adjacencies
+					nodeA.addAdjacentNode(nodeB);
+					nodeB.addAdjacentNode(nodeA);
 				}
 			}
 		}
 
+		// Set up tile adjacencies for nodes
+		for (Tile tile : tiles) {
+			if (tile == null) continue;
+			int[] nodeIds = tile.getNodeIds();
+			for (int nodeId : nodeIds) {
+				nodes[nodeId].addAdjacentTile(tile);
+			}
+		}
 
 		board.setEdges(edges);
 	}

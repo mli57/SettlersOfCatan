@@ -46,10 +46,10 @@ public class Board {
 
 	/**
 	 * Gets all nodes on the board.
-	 * @return the array of nodes
+	 * @return a defensive copy of the nodes array
 	 */
 	public Node[] getNodes() {
-		return nodes;
+		return nodes == null ? null : nodes.clone();
 	}
 
 	/**
@@ -137,17 +137,17 @@ public class Board {
 
 	/**
 	 * Gets all tiles on the board
-	 * @return the array of tiles
+	 * @return a defensive copy of the tiles array
 	 */
 	public Tile[] getTiles() {
-		return tiles;
+		return tiles == null ? null : tiles.clone();
 	}
 
 	/**
 	 * Gets all edges on the board
-	 * @return the array of edges
+	 * @return a defensive copy of the edges array
 	 */
 	public Edge[] getEdges() {
-		return edges;
+		return edges == null ? null : edges.clone();
 	}
 }

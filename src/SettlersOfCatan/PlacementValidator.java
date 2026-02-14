@@ -10,7 +10,16 @@ public class PlacementValidator implements IPlacementValidator {
 	public boolean canPlaceSettlement(Node node, Player player, boolean isSetupPhase) {
 
 		// Validate input parameters
-		if (node == null || player == null) {
+		if (node == null) {
+			return false;
+		}
+		
+		// During setup, player can be null (we only check distance rule)
+		if (isSetupPhase && player == null) {
+			return node.canPlaceBuilding();
+		}
+		
+		if (player == null) {
 			return false;
 		}
 
