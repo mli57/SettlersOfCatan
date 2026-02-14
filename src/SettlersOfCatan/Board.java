@@ -21,7 +21,7 @@ public class Board {
 	/**
 	 * 
 	 */
-	private Edge[] edges;
+	// private Edge[] edges;
 
 	/**
 	 * Random number generator for board generation
@@ -63,10 +63,10 @@ public class Board {
 	 * 
 	 * @return 
 	 */
-	public Edge getEdge() {
-		// Edges are not yet fully modelled; return null for now.
-		return null;
-	}
+	// public Edge getEdge() {
+	// 	// Edges are not yet fully modelled; return null for now.
+	// 	return null;
+	// }
 
 	/**
 	 * Prints all tiles with their number, location (q,s,r), terrain type, and token value.
@@ -189,5 +189,13 @@ public class Board {
 				tileNum++;
 			}
 		}
+	}
+
+	/**
+	 * Gets all tiles on the board
+	 * @return the array of tiles
+	 */
+	public Tile[] getTiles() {
+		return tiles;
 	}
 }

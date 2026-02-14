@@ -36,27 +36,42 @@ public class Game {
 	 */
 	private int roundCount;
 
-	public Game() {
-		this.board  = new Board();
-		// For now, support exactly 2 players
-		this.players = new Player[2];
+	/**
+	 * Dice roller for the game
+	 */
+	private DiceRoller diceRoller;
+
+	/**
+	 * Scanner for input
+	 */
+	private Scanner scanner;
+
+	public Game(int numPlayers, Scanner scanner) {
+		this.board = new Board();
+		this.players = new Player[numPlayers];
+		this.diceRoller = new DiceRoller();
+		this.currentPlayer = 0;
+		this.roundCount = 0;
+		this.scanner = scanner;
+		
+		// Initialize players
+		initializePlayers();
+		
 		// Generate the board immediately
 		this.board.generateBoard();
 	}
 
-	public void intializePlayers(){
-		for (int i = 0;i<players.length;i++){
+	public void initializePlayers(){
+		for (int i = 0; i < players.length; i++){
 			players[i] = new Player(PlayerColor.values()[i]);
 		}
 	}
 
 	/**
-	 * Setup phase: each of the 2 players places their first settlement.
+	 * Setup phase: each player places their first settlement.
 	 * Input is taken from the console as a node id (0-53).
 	 */
 	public void setupInitialSettlements() {
-		Scanner scanner = new Scanner(System.in);
-
 		for (int i = 0; i < players.length; i++) {
 			Player player = players[i];
 
@@ -96,8 +111,114 @@ public class Game {
 	}
 
 	/**
-	 * 
+	 * Starts the game. First sets up initial settlements, then runs the game loop.
 	 */
+	public void startGame() {
+		setupInitialSettlements();
+		
+		// Game loop
+		boolean gameRunning = true;
+		while (gameRunning) {
+			// Each player's turn
+			for (int i = 0; i < players.length; i++) {
+				currentPlayer = i;
+				Player player = players[i];
+				
+				// Roll dice
+				int diceRoll = diceRoller.rollTwoDice(6);
+				System.out.println("\nPlayer " + (i + 1) + " rolled: " + diceRoll);
+				
+				// Distribute resources to all players
+				distributeResources(diceRoll);
+			}
+			
+			roundCount++;
+			
+			// Check if any player has won
+			for (Player p : players) {
+				if (isGameOver(p)) {
+					gameRunning = false;
+					break;
+				}
+			}
+			
+			// For testing purposes, limit to a few rounds
+			if (roundCount >= 3) {
+				System.out.println("\n=== Game ended after " + roundCount + " rounds ===");
+				gameRunning = false;
+			}
+		}
+	}
+
+	/**
+	 * Distributes resources to all players based on the dice roll.
+	 * Each player with a settlement/city on a tile matching the rolled number receives resources.
+	 * @param diceRoll the result of the dice roll
+	 */
+	private void distributeResources(int diceRoll) {
+		// For each tile
+		for (Tile tile : board.getTiles()) {
+			// Check if tile number matches the roll
+			if (tile.getNumber() == diceRoll) {
+				// Get the resource type this tile produces
+				ResourceType resource = getResourceFromTerrain(tile.getTerrain());
+				
+				// Get all nodes on this tile
+				int[] nodeIds = tile.getNodeIds();
+				
+				// Check each node
+				for (int nodeId : nodeIds) {
+					Node node = board.getNode(nodeId);
+					if (node != null && node.isOccupied()) {
+						Player owner = node.getOccupyingPlayer();
+						if (owner != null && resource != ResourceType.NULL) {
+							owner.addResource(resource);
+							System.out.println("Player " + (getPlayerNumber(owner) + 1) + " received " + resource + " from tile at node " + nodeId);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Maps a terrain type to its resource type.
+	 * @param terrain the terrain type
+	 * @return the corresponding resource type
+	 */
+	private ResourceType getResourceFromTerrain(TerrainType terrain) {
+		switch (terrain) {
+			case FOREST:
+				return ResourceType.WOOD;
+			case HILLS:
+				return ResourceType.BRICK;
+			case PASTURE:
+				return ResourceType.SHEEP;
+			case FIELDS:
+				return ResourceType.WHEAT;
+			case MOUNTAINS:
+				return ResourceType.ORE;
+			case DESERT:
+				return ResourceType.NULL;
+			default:
+				return ResourceType.NULL;
+		}
+	}
+
+	/**
+	 * Gets the index of a player in the players array.
+	 * @param player the player to find
+	 * @return the index of the player, or -1 if not found
+	 */
+	private int getPlayerNumber(Player player) {
+		for (int i = 0; i < players.length; i++) {
+			if (players[i] == player) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
 	private void playRound() {
 
 	}

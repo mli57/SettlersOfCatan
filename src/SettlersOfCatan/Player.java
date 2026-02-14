@@ -191,4 +191,12 @@ public class Player {
 	public void addVictoryPoint(int points) {
 		this.victoryPoints += points;
 	}
+
+	/**
+	 * Gets the player's color
+	 * @return the player's color
+	 */
+	public PlayerColor getColor() {
+		return color;
+	}
 }
