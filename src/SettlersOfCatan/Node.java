@@ -36,13 +36,15 @@ public class Node {
 	 * @param id - The id of the node
 	 */
 	public Node(int id){
+		// Initialize node with ID
 		this.id = id;
 		this.building = null;
 		this.occupyingPlayer = null;
+		
+		// Initialize adjacency lists
 		this.adjacentNodes = new ArrayList<>();
 		this.adjacentTiles = new ArrayList<>();
-
-
+		// Node created successfully
 	}
 
 
@@ -147,72 +149,9 @@ public class Node {
 		}
 
 		return true;
+
 	}
 
-	/**
-	 * Places an initial settlement during setup (no resource cost).
-	 * Returns true if placement succeeded.
-	 */
-	public boolean placeInitialSettlement(Player player) {
-		if (!canPlaceBuilding() || player == null) {
-			return false;
-		}
-		// Consume one settlement piece (no resources are paid)
-		player.useSettlementPiece();
-		this.building = new Settlement(player);
-		this.occupyingPlayer = player;
-		player.addVictoryPoint(1);
-		return true;
-	}
-
-	/**
-	 * Places a settlement at the node for the given player, if rules allow.
-	 * Returns true if placement succeeded.
-	 */
-	public boolean placeSettlement(Player player){
-		// Check distance rule + empty
-		if (!canPlaceBuilding()) {
-			return false;
-		}
-
-		// Check player has resources & pieces
-		if (player == null || !player.canBuildSettlement()) {
-			return false;
-		}
-
-		// Let the player pay for the settlement (resources, inventory, VPs)
-		if (!player.payForSettlement()) {
-			return false;
-		}
-
-		this.building = new Settlement(player);
-		this.occupyingPlayer = player;
-		return true;
-	}
-
-	/**
-	 * Upgrades a settlement to a city for the given player, if rules allow.
-	 * Returns true if upgrade succeeded.
-	 */
-	public boolean upgradeToCity(Player player){
-		// Must already have a settlement owned by this player
-		if (!(building instanceof Settlement) || building.getOwner() != player) {
-			return false;
-		}
-
-		// Check player can afford the city upgrade
-		if (player == null || !player.canBuildCity()) {
-			return false;
-		}
-
-		if (!player.payForCityUpgrade()) {
-			return false;
-		}
-
-		this.building = new City(player);
-		this.occupyingPlayer = player;
-		return true;
-	}
 
 	/**
 	 * Checks if the Node is occupied by any player

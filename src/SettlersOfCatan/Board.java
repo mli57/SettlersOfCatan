@@ -4,10 +4,10 @@
 
 package SettlersOfCatan;
 
-import java.util.Random;
 /************************************************************/
 /**
- * 
+ * Data holder for tiles, nodes, and edges with lookup methods.
+ * SOLID: Single Responsibility - only stores and retrieves board data.
  */
 public class Board {
 	/**
@@ -24,9 +24,33 @@ public class Board {
 	private Edge[] edges;
 
 	/**
-	 * Random number generator for board generation
+	 * Sets the tiles array (called by board generator).
 	 */
-	private Random random = new Random();
+	public void setTiles(Tile[] tiles) {
+		this.tiles = tiles;
+	}
+
+	/**
+	 * Sets the nodes array (called by board generator).
+	 */
+	public void setNodes(Node[] nodes) {
+		this.nodes = nodes;
+	}
+
+	/**
+	 * Sets the edges array (called by board generator).
+	 */
+	public void setEdges(Edge[] edges) {
+		this.edges = edges;
+	}
+
+	/**
+	 * Gets all nodes on the board.
+	 * @return the array of nodes
+	 */
+	public Node[] getNodes() {
+		return nodes;
+	}
 
 	/**
 	 * 
@@ -36,14 +60,19 @@ public class Board {
 	 * @return 
 	 */
 	public Tile getTile(int q, int s, int r) {
+		// Check if tiles are initialized
 		if (tiles == null) {
 			return null;
 		}
+		
+		// Search for tile with matching coordinates
 		for (Tile tile : tiles){
 			if (tile.getQ() == q && tile.getS() == s && tile.getR() == r){
 				return tile;
 			}
 		}
+		
+		// Tile not found
 		return null;
 	}
 
@@ -53,10 +82,13 @@ public class Board {
 	 * @return 
 	 */
 	public Node getNode(int id) {
+
 		if (nodes == null || id < 0 || id >= nodes.length) {
 			return null;
 		}
+
 		return nodes[id];
+
 	}
 
 	/**
@@ -65,10 +97,13 @@ public class Board {
 	 * @return the edge, or null if not found
 	 */
 	public Edge getEdge(int id) {
+
 		if (edges == null || id < 0 || id >= edges.length) {
 			return null;
 		}
+
 		return edges[id];
+
 	}
 
 	/**
@@ -78,9 +113,12 @@ public class Board {
 	 * @return the edge if found, null otherwise
 	 */
 	public Edge findEdge(int nodeIdA, int nodeIdB) {
+		// Check if edges are initialized
 		if (edges == null) {
 			return null;
 		}
+		
+		// Search through all edges
 		for (Edge edge : edges) {
 			if (edge != null) {
 				int edgeNodeA = edge.getNodeA().getId();
@@ -92,182 +130,10 @@ public class Board {
 				}
 			}
 		}
+		// Edge not found
 		return null;
 	}
 
-	/**
-	 * Prints all tiles with their number, location (q,s,r), terrain type, and token value.
-	 */
-	public void printTiles() {
-		if (tiles == null) {
-			System.out.println("No tiles generated yet.");
-			return;
-		}
-		
-		System.out.println("\n=== TILES ===");
-		System.out.println("Tile# | Location (q,s,r) | Type      | Token");
-		System.out.println("------|-------------------|-----------|------");
-		
-		for (int i = 0; i < tiles.length; i++) {
-			Tile tile = tiles[i];
-			if (tile != null) {
-				String tokenStr = (tile.getNumber() == 0) ? "DESERT" : String.valueOf(tile.getNumber());
-				System.out.printf("%-5d | (%2d,%2d,%2d)          | %-9s | %s%n",
-					i, tile.getQ(), tile.getS(), tile.getR(), 
-					tile.getTerrain().toString(), tokenStr);
-			}
-		}
-		System.out.println();
-	}
-
-	/**
-	 * Prints all nodes in order (0-53).
-	 */
-	public void printNodes() {
-		if (nodes == null) {
-			System.out.println("No nodes generated yet.");
-			return;
-		}
-		
-		System.out.println("\n=== NODES ===");
-		System.out.print("Node IDs: ");
-		for (int i = 0; i < nodes.length; i++) {
-			System.out.print(i);
-			if (i < nodes.length - 1) {
-				System.out.print(", ");
-			}
-			// Print 10 per line for readability
-			if ((i + 1) % 10 == 0 && i < nodes.length - 1) {
-				System.out.println();
-				System.out.print("          ");
-			}
-		}
-		System.out.println("\n");
-	}
-
-	public void generateBoard() {
-
-		int [] maxTerrainCount = {4,4,4,3,3,1};
-		int [] terrainCount = {0,0,0,0,0,0};
-
-		// Token distribution: 2(1), 3(2), 4(2), 5(2), 6(2), 8(2), 9(2), 10(2), 11(2), 12(1)
-		// Total: 18 tokens for 18 non-desert tiles
-		int [] maxTokenCount = {0, 1, 2, 2, 2, 2, 0, 2, 2, 2, 2, 1}; // indices 0-11 represent numbers 1-12
-		int [] tokenCount = {0,0,0,0,0,0,0,0,0,0,0,0};
-
-		tiles = new Tile[19];
-		// Create all nodes up front (54 intersections)
-		nodes = new Node[54];
-		for (int i = 0; i < 54; i++) {
-			nodes[i] = new Node(i);
-		}
-		int randomTerrain;
-		int tileNum = 0;
-		int[][] tileNodes = {
-			{ 0,  1,  2,  3,  4,  5},  // Tile  0
-			{ 6,  7,  8,  9,  2,  1},  // Tile  1
-			{ 2,  9, 10, 11, 12,  3},  // Tile  2
-			{ 4,  3, 12, 13, 14, 15},  // Tile  3
-			{16,  5,  4, 15, 17, 18},  // Tile  4
-			{19, 20,  0,  5, 16, 21},  // Tile  5
-			{22, 23,  6,  1,  0, 20},  // Tile  6
-			{24, 25, 26, 27,  8,  7},  // Tile  7
-			{ 8, 27, 28, 29, 10,  9},  // Tile  8
-			{10, 29, 30, 31, 32, 11},  // Tile  9
-			{12, 11, 32, 33, 34, 13},  // Tile 10
-			{14, 13, 34, 35, 36, 37},  // Tile 11
-			{17, 15, 14, 37, 38, 39},  // Tile 12
-			{40, 18, 17, 39, 41, 42},  // Tile 13
-			{43, 21, 16, 18, 40, 44},  // Tile 14
-			{45, 46, 19, 21, 43, 47},  // Tile 15
-			{48, 49, 22, 20, 19, 46},  // Tile 16
-			{50, 51, 52, 23, 22, 49},  // Tile 17
-			{52, 53, 24,  7,  6, 23}   // Tile 18
-		};
-
-		int [][] boardCoords = {{0,0,0}, {0,1,-1}, {-1,1,0},
-								{-1,0,1},{0,-1,1},{1,-1,0},
-								{1,0,-1},{0,2,-2},{-1,2,-1},
-								{-2,2,0},{-2,1,1},{-2,0,2},
-								{-1,-1,2},{0,-2,2},{1,-2,1},
-								{2,-2,0},{2,-1,-1},{2,0,-2},
-								{1,1,-2}};
-		
-		while (tileNum < 19) {
-			randomTerrain = random.nextInt(6);
-
-			if (terrainCount[randomTerrain] < maxTerrainCount[randomTerrain]) {
-				terrainCount[randomTerrain]++;
-				TerrainType terrain = TerrainType.values()[randomTerrain];
-				int tokenNumber = 0;
-				
-				// Assign token number if not desert
-				if (terrain != TerrainType.DESERT) {
-					int randomToken;
-					do {
-						randomToken = random.nextInt(12) + 1; // numbers 1-12
-					} while (tokenCount[randomToken - 1] >= maxTokenCount[randomToken - 1]);
-					
-					tokenCount[randomToken - 1]++;
-					tokenNumber = randomToken;
-				}
-				
-				tiles[tileNum] = new Tile(boardCoords[tileNum][0], boardCoords[tileNum][1], boardCoords[tileNum][2], terrain, tokenNumber, tileNodes[tileNum]);
-				tileNum++;
-			}
-		}
-		
-		// Generate all edges from tiles
-		generateEdges();
-	}
-
-	/**
-	 * Generates all edges by going through each tile and creating edges between consecutive nodes.
-	 * Avoids duplicates by checking if an edge with the same two nodes already exists.
-	 * Catan board has exactly 72 unique edges.
-	 */
-	private void generateEdges() {
-		// Catan board has exactly 72 unique edges
-		edges = new Edge[72];
-		int edgeCount = 0;
-		int edgeId = 0;
-		
-		// Go through each tile
-		for (Tile tile : tiles) {
-			if (tile == null) continue;
-			
-			int[] nodeIds = tile.getNodeIds();
-			
-			// For each tile, create 6 edges (connecting consecutive nodes)
-			for (int i = 0; i < 6; i++) {
-				int nodeIdA = nodeIds[i];
-				int nodeIdB = nodeIds[(i + 1) % 6];  // Wrap around: last connects to first
-				
-				// Check if this edge already exists in the array being built (check both node orders)
-				boolean edgeExists = false;
-				for (int j = 0; j < edgeCount; j++) {
-					Edge existingEdge = edges[j];
-					int edgeNodeA = existingEdge.getNodeA().getId();
-					int edgeNodeB = existingEdge.getNodeB().getId();
-					// Check both orders: (A,B) or (B,A)
-					if ((edgeNodeA == nodeIdA && edgeNodeB == nodeIdB) ||
-						(edgeNodeA == nodeIdB && edgeNodeB == nodeIdA)) {
-						edgeExists = true;
-						break;
-					}
-				}
-				
-				if (!edgeExists) {
-					// Create new edge
-					Node nodeA = nodes[nodeIdA];
-					Node nodeB = nodes[nodeIdB];
-					Edge newEdge = new Edge(edgeId++, nodeA, nodeB);
-					edges[edgeCount++] = newEdge;
-				}
-				// If edge exists, skip it (don't create duplicate)
-			}
-		}
-	}
 
 	/**
 	 * Gets all tiles on the board

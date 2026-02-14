@@ -1,35 +1,27 @@
 package SettlersOfCatan;
 
-import java.util.Scanner;
-
 public class Main {
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        // Fixed to 4 players
+        int numPlayers = 4;
         
-        // Ask for number of players
-        int numPlayers = 0;
-        boolean validInput = false;
-        while (!validInput) {
-            System.out.println("How many players are playing? (2-4)");
-            try {
-                numPlayers = scanner.nextInt();
-                if (numPlayers >= 2 && numPlayers <= 4) {
-                    validInput = true;
-                } else {
-                    System.out.println("Please enter a number between 2 and 4.");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid integer.");
-            }
-        }
+        // Create dependencies
+        Board board = new Board();
+        Dice dice = new DiceRoller();
+        Bank bank = new Bank();
+        IPlacementValidator validator = new PlacementValidator();
+        IBoardGenerator generator = new RandomBoardGenerator();
         
-        // Create game with number of players and scanner
-        Game game = new Game(numPlayers, scanner);
+        // Generate board
+        generator.generate(board);
+        
+        // Create game with dependency injection
+        Game game = new Game(board, dice, bank, validator, numPlayers);
         
         // Print board information at the start
         System.out.println("\n=== CATAN GAME START ===");
-        game.getBoard().printTiles();
-        game.getBoard().printNodes();
+        BoardPrinter.printTiles(board);
+        BoardPrinter.printNodes(board);
         
         // Start the game
         game.startGame();

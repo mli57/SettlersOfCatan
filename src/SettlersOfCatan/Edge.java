@@ -15,9 +15,11 @@ public class Edge {
 	private Road road;
 
 	public Edge(int id, Node nodeA, Node nodeB) {
+		// Initialize edge with ID and endpoints
 		this.id = id;
 		this.nodeA = nodeA;
 		this.nodeB = nodeB;
+		// Edge created successfully
 	}
 
 	public int getId() {
@@ -57,7 +59,9 @@ public class Edge {
 	 * Returns true if no road is on this edge (placement rules enforced by Game/Board).
 	 */
 	public boolean canPlaceRoad() {
+
 		return road == null;
+
 	}
 
 	/**
@@ -74,6 +78,9 @@ public class Edge {
 	 * Whether this edge touches the given node.
 	 */
 	public boolean touches(Node node) {
+
 		return node != null && (node == nodeA || node == nodeB);
+
 	}
+
 }

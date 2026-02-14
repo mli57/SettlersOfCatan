@@ -11,12 +11,16 @@ public class City extends Building {
 	private static final int VICTORY_POINTS = 2;
 
 	public City(Player owner) {
+		// Initialize city
 		super(owner);
+		// City created
 	}
 
 	@Override
 	public int getVictoryPoints() {
+
 		return VICTORY_POINTS;
+
 	}
 
 	@Override
@@ -24,10 +28,8 @@ public class City extends Building {
 		return false; // already a city
 	}
 
-	/**
-	 * Cities produce double resources on dice rolls for adjacent tiles.
-	 */
-	public boolean producesDouble() {
-		return true;
+	@Override
+	public int getResourceMultiplier() {
+		return 2;
 	}
 }

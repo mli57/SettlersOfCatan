@@ -10,15 +10,19 @@ import java.util.Random;
 /**
  * Rolls dice for the game.
  */
-public class DiceRoller {
+public class DiceRoller implements Dice {
 	/**
 	 * @param sides 
 	 * @return the sum of two dice
 	 */
 	private final Random random = new Random();
 
+	@Override
 	public int rollTwoDice(int sides) {
+
+		// Roll two dice and sum the results
 		return roll(sides) + roll(sides);
+
 	}
 
 	/**
@@ -26,7 +30,11 @@ public class DiceRoller {
 	 * @param sides 
 	 * @return 
 	 */
+	@Override
 	public int roll(int sides) {
+
+		// Generate random number from 1 to sides
 		return random.nextInt(sides) + 1;
+
 	}
 }

@@ -4,10 +4,21 @@
 
 package SettlersOfCatan;
 
+import java.util.Arrays;
+import java.util.Map;
+
 /**
  * A hex tile on the board. Produces a resource when corresponding number is rolled (except Desert).
  */
 public class Tile {
+	private static final Map<TerrainType, ResourceType> TERRAIN_TO_RESOURCE = Map.of(
+		TerrainType.FOREST, ResourceType.WOOD,
+		TerrainType.PASTURE, ResourceType.SHEEP,
+		TerrainType.FIELDS, ResourceType.WHEAT,
+		TerrainType.HILLS, ResourceType.BRICK,
+		TerrainType.MOUNTAINS, ResourceType.ORE,
+		TerrainType.DESERT, ResourceType.NULL
+	);
 	private final int q;
 	private final int s;
 	private final int r;
@@ -16,35 +27,44 @@ public class Tile {
 	private final int[] nodeIds;  // IDs of the 6 nodes that touch this tile
 
 	public Tile(int q, int s, int r, TerrainType terrain, int number, int[] nodeIds) {
+		// Initialize tile coordinates
 		this.q = q;
 		this.s = s;
 		this.r = r;
+		
+		// Initialize tile properties
 		this.terrain = terrain;
 		this.number = number;
 		this.nodeIds = nodeIds;  // Store the node IDs directly
+		// Tile initialization complete
 	}
 
 	public int getQ(){
 		return q;
 	}
+
 	public int getS(){
 		return s;
 	}
+
 	public int getR(){
 		return r;
 	}
+
 	public TerrainType getTerrain(){
 		return terrain;
 	}
+
 	public int getNumber(){
 		return number;
 	}
 	/**
 	 * Returns the array of node IDs (0-53) that touch this tile.
 	 * To get the actual Node objects, use Board.getNode(id) for each ID.
+	 * Returns a defensive copy to prevent mutation.
 	 */
 	public int[] getNodeIds(){
-		return nodeIds;
+		return Arrays.copyOf(nodeIds, nodeIds.length);
 	}
 
 	/**
@@ -52,21 +72,7 @@ public class Tile {
 	 * Desert produces nothing
 	 */
 	public ResourceType produceResource(){
-		switch(terrain){
-		  case FOREST: 
-			  return ResourceType.WOOD;
-		  case PASTURE:
-			  return ResourceType.SHEEP;
-		  case FIELDS:
-			  return ResourceType.WHEAT;
-		  case HILLS:
-			  return ResourceType.BRICK;
-		  case MOUNTAINS:
-			  return ResourceType.ORE;
-		  case DESERT:
-			  return ResourceType.NULL;
-		  default:
-			  return ResourceType.NULL;
-		}
+		// Look up resource type from terrain
+		return TERRAIN_TO_RESOURCE.getOrDefault(terrain, ResourceType.NULL);
 	}
 }

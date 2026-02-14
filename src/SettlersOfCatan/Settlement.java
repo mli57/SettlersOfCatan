@@ -11,16 +11,25 @@ public class Settlement extends Building {
 	private static final int VICTORY_POINTS = 1;
 
 	public Settlement(Player owner) {
+		// Initialize settlement
 		super(owner);
+		// Settlement created
 	}
 
 	@Override
 	public int getVictoryPoints() {
+
 		return VICTORY_POINTS;
+
 	}
 
 	@Override
 	public boolean canUpgradeToCity() {
 		return true;
+	}
+
+	@Override
+	public int getResourceMultiplier() {
+		return 1;
 	}
 }

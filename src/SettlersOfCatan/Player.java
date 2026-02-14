@@ -20,37 +20,35 @@ public class Player {
 	/**
 	 * 
 	 */
-	protected Map<ResourceType, Integer> resources;
+	private Map<ResourceType, Integer> resources;
 	/**
 	 * 
 	 */
-	protected Map<BuildingType, Integer> buildings;
-
-	private Settlement Settlements;
-	/**
-	 * 
-	 */
-	private City cities;
-	/**
-	 * 
-	 */
-	private Road roads;
+	private Map<BuildingType, Integer> buildings;
 	/**
 	 * 
 	 */
 	private int victoryPoints;
 
 	public Player(PlayerColor color){
+		// Initialize player attributes
 		this.color = color;
 		this.victoryPoints = 0;
+		
+		// Initialize resource and building maps
 		resources = new EnumMap<ResourceType, Integer>(ResourceType.class);
 		buildings = new EnumMap<BuildingType, Integer>(BuildingType.class);
+		
+		// Set all resources to zero initially
 		for (int i = 0; i<ResourceType.values().length; i++){
 			resources.put(ResourceType.values()[i], 0);
 		}
+		
+		// Initialize building counts
 		buildings.put(BuildingType.ROAD, 15);
 		buildings.put(BuildingType.SETTLEMENT, 5);
 		buildings.put(BuildingType.CITY, 4);
+		// Player initialization complete
 	}
 
 	/**
@@ -58,12 +56,17 @@ public class Player {
 	 * @param res 
 	 */
 	public void addResource(ResourceType res) {
+
+		// Ignore NULL resources
 		if (res == ResourceType.NULL){
 			return;
 		}
 
+		// Increment resource count
 		int current = resources.get(res);
 		resources.put(res, current + 1);
+
+		// Resource added successfully
 	}
 
 	/**
@@ -72,98 +75,81 @@ public class Player {
 	 * @return 
 	 */
 	public boolean removeResource(ResourceType res, int amount) {
+
+		// Get current resource count
 		int current = resources.get(res);
+
+		// Check if player has enough resources
 		if ((current - amount) < 0){
 			return false;
 		}
 
+		// Deduct resources
 		resources.put(res, current - amount);
+
+		// Resource removal successful
 		return true;
+
 	}
 
 	/**
-	 * 
-	 * @return 
+	 * Checks if player can afford a given cost map.
+	 * @param cost map of resource types to required amounts
+	 * @return true if player has enough of each resource
+	 */
+	public boolean canAfford(Map<ResourceType, Integer> cost) {
+
+		for (Map.Entry<ResourceType, Integer> entry : cost.entrySet()) {
+			if (resources.get(entry.getKey()) < entry.getValue()) {
+				return false;
+			}
+		}
+
+		return true;
+
+	}
+
+	/**
+	 * Convenience method: checks if player can build a road.
+	 * @return true if player can afford road cost and has road pieces
 	 */
 	public boolean canBuildRoad() {
-		if ((resources.get(ResourceType.WOOD)>0 && resources.get(ResourceType.BRICK)>0) && buildings.get(BuildingType.ROAD)>0) {
-			return true;
-		}
-		return false;
+
+		Map<ResourceType, Integer> roadCost = Bank.getRoadCost();
+		return canAfford(roadCost) && buildings.get(BuildingType.ROAD) > 0;
+
 	}
 
 	/**
-	 * 
-	 * @return 
+	 * Convenience method: checks if player can build a settlement.
+	 * @return true if player can afford settlement cost and has settlement pieces
 	 */
 	public boolean canBuildSettlement() {
-		if ((resources.get(ResourceType.WOOD)>0 && resources.get(ResourceType.BRICK)>0 && resources.get(ResourceType.SHEEP)>0 && resources.get(ResourceType.WHEAT)>0) && buildings.get(BuildingType.SETTLEMENT)>0) {
-			return true;
-		}
-		return false;
+
+		Map<ResourceType, Integer> settlementCost = Bank.getSettlementCost();
+		return canAfford(settlementCost) && buildings.get(BuildingType.SETTLEMENT) > 0;
+
 	}
 
 	/**
-	 * 
-	 * @return 
+	 * Convenience method: checks if player can build a city.
+	 * @return true if player can afford city cost and has city pieces
 	 */
 	public boolean canBuildCity() {
-		if ((resources.get(ResourceType.ORE)>=3 && resources.get(ResourceType.WHEAT)>=2) && buildings.get(BuildingType.CITY)>0) {
-			return true;
-		}
-		return false;
+
+		Map<ResourceType, Integer> cityCost = Bank.getCityCost();
+		return canAfford(cityCost) && buildings.get(BuildingType.CITY) > 0;
+
 	}
 
 	/**
-	 * Pays resources and consumes a settlement piece.
-	 * Does not check canBuildSettlement(); call that first.
-	 * @return true if payment succeeded
+	 * Uses one road piece without paying resources (for initial setup).
 	 */
-	public boolean payForSettlement() {
-		if (!canBuildSettlement()) {
-			return false;
-		}
-
-		// Spend 1 of each: WOOD, BRICK, SHEEP, WHEAT
-		removeResource(ResourceType.WOOD, 1);
-		removeResource(ResourceType.BRICK, 1);
-		removeResource(ResourceType.SHEEP, 1);
-		removeResource(ResourceType.WHEAT, 1);
-
-		// Consume one settlement piece
+	public void useRoadPiece() {
 		buildings.put(
-			BuildingType.SETTLEMENT,
-			buildings.get(BuildingType.SETTLEMENT) - 1
+			BuildingType.ROAD,
+			buildings.get(BuildingType.ROAD) - 1
 		);
-
-		// +1 victory point for a new settlement
-		this.victoryPoints += 1;
-		return true;
-	}
-
-	/**
-	 * Pays resources and consumes a city piece, upgrading an existing settlement.
-	 * Does not check canBuildCity(); call that first.
-	 * @return true if payment succeeded
-	 */
-	public boolean payForCityUpgrade() {
-		if (!canBuildCity()) {
-			return false;
-		}
-
-		// Spend 3 ore and 2 wheat
-		removeResource(ResourceType.ORE, 3);
-		removeResource(ResourceType.WHEAT, 2);
-
-		// Consume one city piece, effectively upgrading one settlement
-		buildings.put(
-			BuildingType.CITY,
-			buildings.get(BuildingType.CITY) - 1
-		);
-
-		// Net +1 victory point (settlement 1 -> city 2)
-		this.victoryPoints += 1;
-		return true;
 	}
 
 	/**
@@ -185,6 +171,16 @@ public class Player {
 	}
 
 	/**
+	 * Uses one city piece.
+	 */
+	public void useCityPiece() {
+		buildings.put(
+			BuildingType.CITY,
+			buildings.get(BuildingType.CITY) - 1
+		);
+	}
+
+	/**
 	 * Adds victory points to the player.
 	 * @param points The number of victory points to add
 	 */
@@ -198,5 +194,33 @@ public class Player {
 	 */
 	public PlayerColor getColor() {
 		return color;
+	}
+
+	/**
+	 * Gets the buildings map (for checking available pieces).
+	 * @return the buildings map
+	 */
+	public Map<BuildingType, Integer> getBuildings() {
+		return buildings;
+	}
+
+	/**
+	 * Gets the resources map.
+	 * @return the resources map
+	 */
+	public Map<ResourceType, Integer> getResources() {
+		return resources;
+	}
+
+	/**
+	 * Gets total resource count.
+	 * @return total number of resource cards
+	 */
+	public int getTotalResourceCount() {
+		int total = 0;
+		for (Integer count : resources.values()) {
+			total += count;
+		}
+		return total;
 	}
 }

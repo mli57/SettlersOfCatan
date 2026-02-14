@@ -11,11 +11,15 @@ public abstract class Building {
 	private final Player owner;
 
 	public Building(Player owner) {
+		// Set building owner
 		this.owner = owner;
+		// Building initialized
 	}
 
 	public Player getOwner() {
+
 		return owner;
+
 	}
 
 	/**
@@ -27,4 +31,10 @@ public abstract class Building {
 	 * Whether this building can be upgraded (Settlement -> City).
 	 */
 	public abstract boolean canUpgradeToCity();
+
+	/**
+	 * Resource multiplier for this building (1 for Settlement, 2 for City).
+	 * @return multiplier for resource production
+	 */
+	public abstract int getResourceMultiplier();
 }
