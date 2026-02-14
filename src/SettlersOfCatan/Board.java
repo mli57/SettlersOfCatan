@@ -60,11 +60,38 @@ public class Board {
 	}
 
 	/**
-	 * 
-	 * @return 
+	 * Gets an edge by its ID.
+	 * @param id the edge ID
+	 * @return the edge, or null if not found
 	 */
-	public Edge getEdge() {
-		// Edges are not yet fully modelled; return null for now.
+	public Edge getEdge(int id) {
+		if (edges == null || id < 0 || id >= edges.length) {
+			return null;
+		}
+		return edges[id];
+	}
+
+	/**
+	 * Finds an edge between two nodes (checks both node orders).
+	 * @param nodeIdA first node ID
+	 * @param nodeIdB second node ID
+	 * @return the edge if found, null otherwise
+	 */
+	public Edge findEdge(int nodeIdA, int nodeIdB) {
+		if (edges == null) {
+			return null;
+		}
+		for (Edge edge : edges) {
+			if (edge != null) {
+				int edgeNodeA = edge.getNodeA().getId();
+				int edgeNodeB = edge.getNodeB().getId();
+				// Check both orders: (A,B) or (B,A)
+				if ((edgeNodeA == nodeIdA && edgeNodeB == nodeIdB) ||
+					(edgeNodeA == nodeIdB && edgeNodeB == nodeIdA)) {
+					return edge;
+				}
+			}
+		}
 		return null;
 	}
 
@@ -189,6 +216,57 @@ public class Board {
 				tileNum++;
 			}
 		}
+		
+		// Generate all edges from tiles
+		generateEdges();
+	}
+
+	/**
+	 * Generates all edges by going through each tile and creating edges between consecutive nodes.
+	 * Avoids duplicates by checking if an edge with the same two nodes already exists.
+	 * Catan board has exactly 72 unique edges.
+	 */
+	private void generateEdges() {
+		// Catan board has exactly 72 unique edges
+		edges = new Edge[72];
+		int edgeCount = 0;
+		int edgeId = 0;
+		
+		// Go through each tile
+		for (Tile tile : tiles) {
+			if (tile == null) continue;
+			
+			int[] nodeIds = tile.getNodeIds();
+			
+			// For each tile, create 6 edges (connecting consecutive nodes)
+			for (int i = 0; i < 6; i++) {
+				int nodeIdA = nodeIds[i];
+				int nodeIdB = nodeIds[(i + 1) % 6];  // Wrap around: last connects to first
+				
+				// Check if this edge already exists in the array being built (check both node orders)
+				boolean edgeExists = false;
+				for (int j = 0; j < edgeCount; j++) {
+					Edge existingEdge = edges[j];
+					int edgeNodeA = existingEdge.getNodeA().getId();
+					int edgeNodeB = existingEdge.getNodeB().getId();
+					// Check both orders: (A,B) or (B,A)
+					if ((edgeNodeA == nodeIdA && edgeNodeB == nodeIdB) ||
+						(edgeNodeA == nodeIdB && edgeNodeB == nodeIdA)) {
+						edgeExists = true;
+						break;
+					}
+				}
+				
+				if (!edgeExists) {
+					// Create new edge
+					Node nodeA = nodes[nodeIdA];
+					Node nodeB = nodes[nodeIdB];
+					Edge newEdge = new Edge(edgeId++, nodeA, nodeB);
+					edges[edgeCount++] = newEdge;
+				}
+				// If edge exists, skip it (don't create duplicate)
+			}
+		}
 	}
 
 	/**
@@ -197,5 +275,13 @@ public class Board {
 	 */
 	public Tile[] getTiles() {
 		return tiles;
+	}
+
+	/**
+	 * Gets all edges on the board
+	 * @return the array of edges
+	 */
+	public Edge[] getEdges() {
+		return edges;
 	}
 }

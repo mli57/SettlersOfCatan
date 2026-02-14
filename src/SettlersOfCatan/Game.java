@@ -161,7 +161,7 @@ public class Game {
 			// Check if tile number matches the roll
 			if (tile.getNumber() == diceRoll) {
 				// Get the resource type this tile produces
-				ResourceType resource = getResourceFromTerrain(tile.getTerrain());
+				ResourceType resource = tile.produceResource();
 				
 				// Get all nodes on this tile
 				int[] nodeIds = tile.getNodeIds();
@@ -178,30 +178,6 @@ public class Game {
 					}
 				}
 			}
-		}
-	}
-
-	/**
-	 * Maps a terrain type to its resource type.
-	 * @param terrain the terrain type
-	 * @return the corresponding resource type
-	 */
-	private ResourceType getResourceFromTerrain(TerrainType terrain) {
-		switch (terrain) {
-			case FOREST:
-				return ResourceType.WOOD;
-			case HILLS:
-				return ResourceType.BRICK;
-			case PASTURE:
-				return ResourceType.SHEEP;
-			case FIELDS:
-				return ResourceType.WHEAT;
-			case MOUNTAINS:
-				return ResourceType.ORE;
-			case DESERT:
-				return ResourceType.NULL;
-			default:
-				return ResourceType.NULL;
 		}
 	}
 
