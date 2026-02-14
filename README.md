@@ -7,4 +7,4 @@ A Java based implementation of the game Settlers of Catan. Currently contains on
 Up to 4 players compete to build settlements, cities, and roads on an island. Resources (wood, sheep, wheat, brick, ore) are produced when matching dice numbers are rolled. Players trade resources strategically to acquire building materials. The first player to reach 10 victory points wins.
 
 Settlers of Catan board game coded in Java.
-https://github.com/users/Kabir-88/projects/1
+Kanban Board: https://github.com/users/Kabir-88/projects/1
