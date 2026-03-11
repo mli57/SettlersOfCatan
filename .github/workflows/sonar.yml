@@ -33,7 +33,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.projectKey=SettlersOfCatan
+            -Dsonar.projectKey=mli57_SettlersOfCatan
             -Dsonar.organization=mli57
             -Dsonar.sources=src
             -Dsonar.java.binaries=bin
