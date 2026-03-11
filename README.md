@@ -1,5 +1,5 @@
 # Settlers Of Catan
-[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=mli57_SettlersOfCatan)](https://sonarcloud.io/summary/new_code?id=mli57_SettlersOfCatan)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=mli57_SettlersOfCatan&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=mli57_SettlersOfCatan)
 
 A Java based implementation of the game Settlers of Catan. Currently contains only the rudimentary functionalities(resource, roads, settlements, cities)
 
