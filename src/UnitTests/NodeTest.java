@@ -1,4 +1,3 @@
-
 /**
  * Tests for the Node class in our Settlers of Catan game.
  * Checks building placement rules, especially the distance rule.
@@ -6,7 +5,8 @@
  */
 
 package UnitTests;
-import static org.junit.jupiter.api.Assertions.*;       
+
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -28,13 +28,18 @@ public class NodeTest {
 
     /**
      * Test 1: Isolated node with no building and no adjacent nodes should allow placing a building.
+     * Also verifies getId, isOccupied, getOccupyingPlayer, and getAdjacentNodes on a fresh node.
      */
     @Test
     @Timeout(value = DEFAULT_TIMEOUT, unit = TimeUnit.SECONDS)
-    public void canPlaceBuildingReturnsTrueForIsolatedEmptyNode() {
-        Node node = new Node(0);
+    public void canPlaceBuildingReturnsTrueForIsolatedEmptyNodeAndGettersWork() {
+        Node node = new Node(7);
 
         assertTrue(node.canPlaceBuilding(), "Node should allow building when isolated and empty");
+        assertFalse(node.isOccupied(), "Fresh node should not be occupied");
+        assertNull(node.getOccupyingPlayer(), "Fresh node should have no occupying player");
+        assertEquals(7, node.getId(), "getId should return the assigned ID");
+        assertTrue(node.getAdjacentNodes().isEmpty(), "Fresh node should have no adjacent nodes");
     }
 
     /**
@@ -56,16 +61,20 @@ public class NodeTest {
     }
 
     /**
-     * Test 3: Node already occupied should not allow another building, even if all adjacent nodes are empty.
+     * Test 3: Node already occupied should not allow another building.
+     * Also verifies isOccupied and getOccupyingPlayer after setting a building.
      */
     @Test
     @Timeout(value = DEFAULT_TIMEOUT, unit = TimeUnit.SECONDS)
-    public void canPlaceBuildingReturnsFalseWhenNodeAlreadyHasBuilding() {
+    public void canPlaceBuildingReturnsFalseWhenNodeAlreadyHasBuildingAndIsOccupied() {
         Node node = new Node(3);
-
         Player anotherDummy = new Player(PlayerColor.BLUE);
+
         node.setBuilding(new Settlement(anotherDummy));
+        node.setOccupyingPlayer(anotherDummy);
 
         assertFalse(node.canPlaceBuilding(), "Node should not allow building when already occupied");
+        assertTrue(node.isOccupied(), "Node should report occupied after building is set");
+        assertSame(anotherDummy, node.getOccupyingPlayer(), "getOccupyingPlayer should return the player who owns the building");
     }
 }
