@@ -1,4 +1,3 @@
-
 /**
  * Tests for the Edge class in our Settlers of Catan game.
  * Checks road placement, node touching, adjacency, and player ownership.
@@ -7,7 +6,7 @@
 
 package UnitTests;
 
-import static org.junit.jupiter.api.Assertions.*;       
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -57,25 +56,32 @@ public class EdgeTest {
     }
 
     /**
-     * Test 1: canPlaceRoad returns true when the edge is empty, false when occupied.
+     * Test 1: canPlaceRoad and getRoad reflect edge state correctly before and after placing a road.
      */
     @Test
     @Timeout(value = DEFAULT_TIMEOUT, unit = TimeUnit.SECONDS)
-    public void canPlaceRoadReturnsTrueWhenEmptyFalseWhenOccupied() {
+    public void canPlaceRoadAndGetRoadReflectEdgeState() {
         assertTrue(edgeAB.canPlaceRoad(), "Road should be placeable on empty edge");
+        assertNull(edgeAB.getRoad(), "getRoad should return null on empty edge");
 
         Road road = new Road(player, edgeAB);
         edgeAB.setRoad(road);
 
         assertFalse(edgeAB.canPlaceRoad(), "Road should not be placeable on occupied edge");
+        assertSame(road, edgeAB.getRoad(), "getRoad should return the placed road");
     }
 
     /**
      * Test 2: touches returns true for the edge's endpoints, false for other nodes or null.
+     * Also verifies getId, getNodeA, and getNodeB return correct values.
      */
     @Test
     @Timeout(value = DEFAULT_TIMEOUT, unit = TimeUnit.SECONDS)
-    public void touchesReturnsTrueForEndpointsFalseForOtherAndNull() {
+    public void touchesAndGettersReturnCorrectValues() {
+        assertEquals(0, edgeAB.getId(), "getId should return the edge's assigned ID");
+        assertSame(nodeA, edgeAB.getNodeA(), "getNodeA should return the first endpoint");
+        assertSame(nodeB, edgeAB.getNodeB(), "getNodeB should return the second endpoint");
+
         assertTrue(edgeAB.touches(nodeA), "Edge should touch its first endpoint");
         assertTrue(edgeAB.touches(nodeB), "Edge should touch its second endpoint");
         assertFalse(edgeAB.touches(nodeC), "Edge should not touch an unrelated node");

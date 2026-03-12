@@ -5,7 +5,8 @@
  */
 
 package UnitTests;
-import static org.junit.jupiter.api.Assertions.*;       
+
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -82,5 +83,25 @@ public class PlayerTest {
         player.getResources().put(ResourceType.BRICK, 3);
 
         assertEquals(5, player.getTotalResourceCount(), "Total resource count should be 5 after adding resources");
+    }
+
+    /**
+     * Test 4: addResource increments the correct resource type, ignores NULL resources,
+     * and getColor returns the player's assigned color.
+     */
+    @Test
+    @Timeout(value = DEFAULT_TIMEOUT, unit = TimeUnit.SECONDS)
+    public void addResourceIgnoresNullAndGetColorReturnsAssignedColor() {
+        assertEquals(PlayerColor.RED, player.getColor(), "getColor should return the player's assigned color");
+
+        player.addResource(ResourceType.WOOD);
+        player.addResource(ResourceType.WOOD);
+        player.addResource(ResourceType.ORE);
+        assertEquals(2, player.getResources().get(ResourceType.WOOD), "Wood count should be 2 after two addResource calls");
+        assertEquals(1, player.getResources().get(ResourceType.ORE), "Ore count should be 1 after one addResource call");
+
+        /* NULL resources must be ignored */
+        player.addResource(ResourceType.NULL);
+        assertEquals(3, player.getTotalResourceCount(), "NULL resource should not increase the total resource count");
     }
 }
