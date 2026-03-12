@@ -136,17 +136,77 @@ public class Game {
 			Player player = players[i]; // Current player setting up
 			System.out.println("\n=== " + player.getColor() + " Player Setup ===");
 
-			// Place first settlement
-			placeSettlement(player, i, 1);
-			
-			// Place first road
-			placeRoad(player, i, 1);
-			
-			// Place second settlement
-			placeSettlement(player, i, 2);
-			
-			// Place second road
-			placeRoad(player, i, 2);
+			if (player instanceof HumanPlayer) {
+				setupInitialSettlementsHuman((HumanPlayer) player);
+			} else {
+				// AI setup: automated placement
+				placeSettlement(player, i, 1);
+				
+				// Place first road
+				placeRoad(player, i, 1);
+				
+				// Place second settlement
+				placeSettlement(player, i, 2);
+				
+				// Place second road
+				placeRoad(player, i, 2);
+			}
+		}
+	}
+
+	/**
+	 * Setup phase for a human player: interactively place 2 settlements and 2 roads.
+	 * Uses the same command syntax as the main human turn but only allows
+	 * build settlement / build road during setup.
+	 *
+	 * Order: Settlement 1, Road 1, Settlement 2, Road 2.
+	 * @param player the human player setting up
+	 */
+	private void setupInitialSettlementsHuman(HumanPlayer player) {
+		for (int n = 1; n <= 2; n++) {
+			// Settlement n
+			while (true) {
+				System.out.println("Place settlement #" + n + " (command: build settlement <nodeId>):");
+				System.out.print("> ");
+				HumanCommandParser.ParsedCommand cmd = HumanCommandParser.parse(scanner.nextLine());
+				if (cmd.getAction() != BUILD_SETTLEMENT) {
+					System.out.println("Please use: build settlement <nodeId>");
+					continue;
+				}
+				Node node = board.getNode(cmd.getNodeId());
+				if (node == null) {
+					System.out.println("Invalid node.");
+					continue;
+				}
+				if (placeSettlementSetup(node, player)) {
+					System.out.println("Settlement built on node " + cmd.getNodeId());
+					break;
+				} else {
+					System.out.println("Cannot build settlement there. Try another node.");
+				}
+			}
+
+			// Road n
+			while (true) {
+				System.out.println("Place road #" + n + " (command: build road <fromNodeId>,<toNodeId>):");
+				System.out.print("> ");
+				HumanCommandParser.ParsedCommand cmd = HumanCommandParser.parse(scanner.nextLine());
+				if (cmd.getAction() != BUILD_ROAD) {
+					System.out.println("Please use: build road <fromNodeId>,<toNodeId>");
+					continue;
+				}
+				Edge edge = board.findEdge(cmd.getFromNodeId(), cmd.getToNodeId());
+				if (edge == null) {
+					System.out.println("No edge between those nodes.");
+					continue;
+				}
+				if (placeRoadSetup(edge, player)) {
+					System.out.println("Road built from node " + cmd.getFromNodeId() + " to node " + cmd.getToNodeId());
+					break;
+				} else {
+					System.out.println("Cannot build road there. Try another pair of nodes.");
+				}
+			}
 		}
 	}
 
