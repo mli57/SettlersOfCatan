@@ -103,5 +103,17 @@ public class PlayerTest {
         /* NULL resources must be ignored */
         player.addResource(ResourceType.NULL);
         assertEquals(3, player.getTotalResourceCount(), "NULL resource should not increase the total resource count");
+
+        /* canBuildRoad, canBuildSettlement, and canBuildCity convenience methods */
+        assertFalse(player.canBuildRoad(), "Player with no brick cannot build a road");
+        player.getResources().put(ResourceType.WOOD, 1);
+        player.getResources().put(ResourceType.BRICK, 1);
+        assertTrue(player.canBuildRoad(), "Player with road resources can build a road");
+
+        assertFalse(player.canBuildSettlement(), "Player without full settlement resources cannot build a settlement");
+        assertFalse(player.canBuildCity(), "Player without city resources cannot build a city");
+        player.getResources().put(ResourceType.ORE, 3);
+        player.getResources().put(ResourceType.WHEAT, 2);
+        assertTrue(player.canBuildCity(), "Player with city resources can build a city");
     }
 }

@@ -103,6 +103,9 @@ public class BankTest {
         assertEquals(0, player.getResources().get(ResourceType.WHEAT), "Wheat resources should be zero after purchase");
         assertEquals(initialCities - 1, player.getBuildings().get(BuildingType.CITY), "City count should decrease by 1");
         assertEquals(initialVictoryPoints + 1, player.getVictoryPoints(), "Victory points should increase by 1");
+
+        /* Buying again with no resources left should fail */
+        assertFalse(bank.payForCity(player), "City purchase should fail when player has insufficient resources");
     }
 
     /**
