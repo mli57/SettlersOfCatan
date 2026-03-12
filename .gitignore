@@ -1,13 +1,21 @@
 # Compiled Java classes
 bin/
 
-# JaCoCo runtime files
+# JaCoCo runtime and zip
 jacoco.exec
 jacoco.zip
 
 # Coverage reports
 coverage.xml
 coverage/
+index.html
+
+# JaCoCo extracted artifacts (from zip, not needed in repo)
+doc/
+lib/
+
+# Test results
+test/
 
 # Build artifacts
 sources.txt
