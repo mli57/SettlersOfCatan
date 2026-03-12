@@ -20,11 +20,42 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Download JaCoCo
+        run: |
+          mkdir -p tools/jacoco
+          curl -L -o jacoco.zip https://github.com/jacoco/jacoco/releases/download/v0.8.12/jacoco-0.8.12.zip
+          unzip jacoco.zip -d tools/jacoco
+
+      - name: Download JUnit Suite dependencies
+        run: |
+          curl -L -o src/lib/junit-platform-suite-api-1.11.4.jar https://repo1.maven.org/maven2/org/junit/platform/junit-platform-suite-api/1.11.4/junit-platform-suite-api-1.11.4.jar
+          curl -L -o src/lib/junit-platform-suite-engine-1.11.4.jar https://repo1.maven.org/maven2/org/junit/platform/junit-platform-suite-engine/1.11.4/junit-platform-suite-engine-1.11.4.jar
+          curl -L -o src/lib/junit-platform-suite-commons-1.11.4.jar https://repo1.maven.org/maven2/org/junit/platform/junit-platform-suite-commons/1.11.4/junit-platform-suite-commons-1.11.4.jar
+
       - name: Compile Java sources
         run: |
           mkdir -p bin
           find src -name '*.java' > sources.txt
-          javac -cp "src/lib/*" -d bin @sources.txt
+          javac -cp "src/lib/*" --release 17 -d bin @sources.txt
+
+      - name: Run tests with JaCoCo coverage
+        run: |
+          java -javaagent:tools/jacoco/lib/jacocoagent.jar=destfile=jacoco.exec \
+            -jar src/lib/junit-platform-console-standalone-1.13.0-M3.jar \
+            -cp "bin:src/lib/junit-platform-suite-api-1.11.4.jar:src/lib/junit-platform-suite-engine-1.11.4.jar:src/lib/junit-platform-suite-commons-1.11.4.jar" \
+            --select-class=UnitTests.CoreGameSuite \
+            --select-class=UnitTests.PlacementSuite
+
+      - name: Generate JaCoCo XML report
+        run: |
+          java -jar tools/jacoco/lib/jacococli.jar report jacoco.exec \
+            --classfiles bin/SettlersOfCatan/Player.class \
+            --classfiles bin/SettlersOfCatan/Bank.class \
+            --classfiles bin/SettlersOfCatan/Node.class \
+            --classfiles bin/SettlersOfCatan/Edge.class \
+            --classfiles bin/SettlersOfCatan/PlacementValidator.class \
+            --sourcefiles src/SettlersOfCatan \
+            --xml coverage.xml
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v3.1.0
@@ -35,5 +66,7 @@ jobs:
           args: >
             -Dsonar.projectKey=mli57_SettlersOfCatan
             -Dsonar.organization=mli57
-            -Dsonar.sources=src
+            -Dsonar.sources=src/SettlersOfCatan
+            -Dsonar.tests=src/UnitTests
             -Dsonar.java.binaries=bin
+            -Dsonar.coverage.jacoco.xmlReportPaths=coverage.xml
