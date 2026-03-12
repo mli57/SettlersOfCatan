@@ -4,9 +4,13 @@ import static SettlersOfCatan.HumanCommandParser.Action.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Set;
 
 /**
  * Main game controller that orchestrates the Settlers of Catan game flow.
@@ -48,6 +52,9 @@ public class Game {
 
 	/** Scanner for reading human player input from console **/
 	private final Scanner scanner = new Scanner(System.in);
+
+	/** Index of the tile currently holding the Robber (R2.5); -1 means unset. **/
+	private int robberTileIndex = -1;
 
 	/** Victory points needed to win the game **/
 	private static final int VICTORY_POINTS_TO_WIN = 10;
@@ -273,13 +280,17 @@ public class Game {
 				int diceRoll = dice.rollTwoDice(DICE_SIDES);
 				System.out.println("Dice roll: " + diceRoll);
 				
-		// Distribute resources to all players
-		distributeResources(diceRoll);
-		
-		// Player actions - build or pass
-		playerTurn(player, i);
-		
-		// End of turn processing
+				// Distribute resources or handle robber on 7
+				if (diceRoll == 7) {
+					handleRobber(player);
+				} else {
+					distributeResources(diceRoll);
+				}
+				
+				// Player actions - build or pass
+				playerTurn(player, i);
+				
+				// End of turn processing
 			}
 			
 			// Print victory points at end of round (R1.7 requirement)
@@ -361,7 +372,11 @@ public class Game {
 					}
 					int roll = dice.rollTwoDice(DICE_SIDES);
 					System.out.println(roundCount + " / " + player.getColor() + ": Rolled " + roll);
-					distributeResources(roll);
+					if (roll == 7) {
+						handleRobber(player);
+					} else {
+						distributeResources(roll);
+					}
 					rolled = true;
 					break;
 				case LIST:
@@ -424,6 +439,112 @@ public class Game {
 					return;
 				default: System.out.println("Unknown command.");
 			}
+		}
+	}
+
+	/**
+	 * Handles the Robber mechanism for a roll of 7 (R2.5) with assignment simplifications.
+	 * 1) Players with more than 7 cards discard down to 7 (randomly).
+	 * 2) Robber moves to a random tile (different from current).
+	 * 3) Active player steals one random card from a random qualifying adjacent player.
+	 * @param activePlayer the player who rolled 7
+	 */
+	private void handleRobber(Player activePlayer) {
+
+		// Step 1 — Card discard
+		for (Player p : players) {
+			int total = p.getTotalResourceCount();
+			if (total <= 7) {
+				continue;
+			}
+
+			int toDiscard = total - 7;
+			List<ResourceType> cards = new ArrayList<>();
+			for (Map.Entry<ResourceType, Integer> entry : p.getResources().entrySet()) {
+				ResourceType type = entry.getKey();
+				if (type == ResourceType.NULL) {
+					continue;
+				}
+				for (int i = 0; i < entry.getValue(); i++) {
+					cards.add(type);
+				}
+			}
+
+			Collections.shuffle(cards, random);
+			for (int i = 0; i < toDiscard && i < cards.size(); i++) {
+				p.removeResource(cards.get(i), 1);
+			}
+		}
+
+		// Step 2 — Robber placement
+		Tile[] tiles = board.getTiles();
+		if (tiles == null || tiles.length == 0) {
+			return;
+		}
+
+		int newIndex = robberTileIndex;
+		if (tiles.length == 1) {
+			newIndex = 0;
+		} else {
+			while (newIndex == robberTileIndex) {
+				newIndex = random.nextInt(tiles.length);
+			}
+		}
+
+		robberTileIndex = newIndex;
+		System.out.println(roundCount + " / ROBBER: Moved to tile " + robberTileIndex);
+
+		// Step 3 — Steal a card
+		Tile robberTile = tiles[robberTileIndex];
+		int[] nodeIds = robberTile.getNodeIds();
+
+		Set<Player> uniqueVictims = new HashSet<>();
+		for (int nodeId : nodeIds) {
+			Node node = board.getNode(nodeId);
+			if (node == null) {
+				continue;
+			}
+			if (!node.isOccupied()) {
+				continue;
+			}
+
+			Player owner = node.getOccupyingPlayer();
+			if (owner == null) {
+				continue;
+			}
+			if (owner == activePlayer) {
+				continue;
+			}
+
+			uniqueVictims.add(owner);
+		}
+
+		if (uniqueVictims.isEmpty()) {
+			return;
+		}
+
+		List<Player> victims = new ArrayList<>(uniqueVictims);
+		Player victim = victims.get(random.nextInt(victims.size()));
+
+		List<ResourceType> victimCards = new ArrayList<>();
+		for (Map.Entry<ResourceType, Integer> entry : victim.getResources().entrySet()) {
+			ResourceType type = entry.getKey();
+			if (type == ResourceType.NULL) {
+				continue;
+			}
+			for (int i = 0; i < entry.getValue(); i++) {
+				victimCards.add(type);
+			}
+		}
+
+		if (victimCards.isEmpty()) {
+			return;
+		}
+
+		ResourceType stolen = victimCards.get(random.nextInt(victimCards.size()));
+		if (victim.removeResource(stolen, 1)) {
+			activePlayer.addResource(stolen);
+			System.out.println(roundCount + " / " + activePlayer.getColor() + ": Stole from " + victim.getColor());
 		}
 	}
 
