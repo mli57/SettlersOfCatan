@@ -18,6 +18,7 @@ import SettlersOfCatan.Node;
 import SettlersOfCatan.PlacementValidator;
 import SettlersOfCatan.Player;
 import SettlersOfCatan.PlayerColor;
+import SettlersOfCatan.Road;
 import SettlersOfCatan.Settlement;
 
 /**
@@ -69,6 +70,10 @@ public class PlacementValidatorTest {
         adjacent.setBuilding(new Settlement(dummyPlayer));
 
         assertFalse(validator.canPlaceSettlement(node, null, true), "Settlement should not be placeable due to distance rule violation");
+
+        /* Empty node with non-null player in setup phase should succeed */
+        Node emptyNode = new Node(5);
+        assertTrue(validator.canPlaceSettlement(emptyNode, player, true), "Settlement should be placeable in setup phase on empty node with player");
     }
 
     /**
@@ -90,6 +95,15 @@ public class PlacementValidatorTest {
         /* Null edge and null player should both fail */
         assertFalse(validator.canPlaceRoad(null, player, true), "Road should not be placeable on a null edge");
         assertFalse(validator.canPlaceRoad(edge, null, true), "Road should not be placeable for a null player");
+
+        /* Already occupied edge should fail */
+        Road road = new Road(player, edge);
+        edge.setRoad(road);
+        assertFalse(validator.canPlaceRoad(edge, player, true), "Road should not be placeable on an already occupied edge");
+
+        /* Normal play phase returns true (connectivity is checked by Game) */
+        Edge freshEdge = new Edge(1, new Node(3), new Node(4));
+        assertTrue(validator.canPlaceRoad(freshEdge, player, false), "Road should be placeable in normal play phase on empty edge");
     }
 
     /**
