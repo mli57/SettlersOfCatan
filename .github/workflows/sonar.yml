@@ -24,7 +24,7 @@ jobs:
         run: |
           mkdir -p bin
           find src -name '*.java' > sources.txt
-          javac -d bin @sources.txt
+          javac -cp "src/lib/*" -d bin @sources.txt
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v3.1.0
