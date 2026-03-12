@@ -64,3 +64,17 @@ jobs:
             -Dsonar.tests=src/UnitTests
             -Dsonar.java.binaries=bin
             -Dsonar.coverage.jacoco.xmlReportPaths=coverage.xml
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v3.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=mli57_SettlersOfCatan
+            -Dsonar.organization=mli57
+            -Dsonar.sources=src/SettlersOfCatan
+            -Dsonar.tests=src/UnitTests
+            -Dsonar.java.binaries=bin
+            -Dsonar.coverage.jacoco.xmlReportPaths=coverage.xml
+            -Dsonar.inclusions=**/Bank.java,**/Player.java,**/Node.java,**/Edge.java,**/PlacementValidator.java
