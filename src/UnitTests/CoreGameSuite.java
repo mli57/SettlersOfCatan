@@ -1,3 +1,7 @@
+/**
+ * Test suite for core game mechanics, which includes bank, player, node, and edge tests.
+ * @author Sarthak Kulashari
+ */
 package UnitTests;
 
 import org.junit.platform.suite.api.SelectClasses;

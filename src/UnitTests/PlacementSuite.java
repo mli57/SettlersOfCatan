@@ -1,6 +1,6 @@
 
 /**
- * Test suite for core game mechanics, which includes bank and player test.
+ * Test suite for placement mechanics, which includes runs tests for placement rules, including nodes, edges, and validation.
  * @author Sarthak Kulashari
  */
 
