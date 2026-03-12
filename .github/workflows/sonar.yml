@@ -20,12 +20,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Download JaCoCo
-        run: |
-          mkdir -p tools/jacoco
-          curl -L -o jacoco.zip https://github.com/jacoco/jacoco/releases/download/v0.8.12/jacoco-0.8.12.zip
-          unzip jacoco.zip -d tools/jacoco
-
       - name: Download JUnit Suite dependencies
         run: |
           curl -L -o src/lib/junit-platform-suite-api-1.11.4.jar https://repo1.maven.org/maven2/org/junit/platform/junit-platform-suite-api/1.11.4/junit-platform-suite-api-1.11.4.jar
