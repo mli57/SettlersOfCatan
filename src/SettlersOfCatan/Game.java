@@ -1,8 +1,11 @@
 package SettlersOfCatan;
 
+import static SettlersOfCatan.HumanCommandParser.Action.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Scanner;
 
 /**
  * Main game controller that orchestrates the Settlers of Catan game flow.
@@ -41,6 +44,9 @@ public class Game {
 
 	/** Random number generator for AI player decisions **/
 	private Random random;
+
+	/** Scanner for reading human player input from console **/
+	private final Scanner scanner = new Scanner(System.in);
 
 	/** Victory points needed to win the game **/
 	private static final int VICTORY_POINTS_TO_WIN = 10;
@@ -84,6 +90,16 @@ public class Game {
 		for (int i = 0; i < players.length; i++){
 			players[i] = new Player(PlayerColor.values()[i]);
 		}
+	}
+
+	/**
+	 * Replaces the player at the given index with a HumanPlayer.
+	 * Call before startGame().
+	 * @param index 0-3 corresponding to PlayerColor order
+	 */
+	public void setHumanPlayer(int index) {
+		if (index < 0 || index >= players.length) return;
+		players[index] = new HumanPlayer(PlayerColor.values()[index]);
 	}
 
 	/**
@@ -261,18 +277,20 @@ public class Game {
 	}
 
 	/**
-	 * Handles a player's turn - they choose randomly from available actions.
+	 * Handles a player's turn.
+	 * If the player is a HumanPlayer, reads commands from the console.
+	 * Otherwise the agent picks randomly from available actions.
 	 * @param player The player whose turn it is
 	 * @param playerIndex The index of the player in the players array
 	 */
 	private void playerTurn(Player player, int playerIndex) {
-		// Count total resources
-		int totalResources = getTotalResourceCount(player);
+		if (player instanceof HumanPlayer) {
+			humanTurn((HumanPlayer) player);
+			return;
+		}
 		
-		// If player has 7+ resources, must build something
-		boolean mustBuild = totalResources >= MAX_RESOURCES_BEFORE_BUILD;
-		
-		// Get available actions
+		// AI path: unchanged from A1
+		boolean mustBuild = getTotalResourceCount(player) >= MAX_RESOURCES_BEFORE_BUILD;
 		List<String> availableActions = getAvailableActions(player, mustBuild);
 		
 		if (availableActions.isEmpty()) {
@@ -296,6 +314,91 @@ public class Game {
 			case "PASS":
 				System.out.println(roundCount + " / " + player.getColor() + ": Pass");
 				break;
+		}
+	}
+
+	/**
+	 * Human turn loop: reads console commands until "go" is typed.
+	 * @param player the player whose turn it is
+	 */
+	private void humanTurn(HumanPlayer player) {
+		boolean rolled = false;
+		System.out.println("Your hand: " + player.formatHand());
+		System.out.println("Commands: roll | list | build settlement <id> | build city <id> | build road <fromId>,<toId> | go");
+		while (true) {
+			System.out.print("> ");
+			HumanCommandParser.ParsedCommand cmd = HumanCommandParser.parse(scanner.nextLine());
+			switch (cmd.getAction()) {
+				case ROLL:
+					if (rolled) {
+						System.out.println("Already rolled.");
+						break;
+					}
+					int roll = dice.rollTwoDice(DICE_SIDES);
+					System.out.println(roundCount + " / " + player.getColor() + ": Rolled " + roll);
+					distributeResources(roll);
+					rolled = true;
+					break;
+				case LIST:
+					System.out.println("Hand: " + player.formatHand());
+					break;
+				case BUILD_SETTLEMENT:
+					if (!rolled) {
+						System.out.println("Roll first.");
+						break;
+					}
+					Node sNode = board.getNode(cmd.getNodeId());
+					if (sNode == null) {
+						System.out.println("Invalid node.");
+						break;
+					}
+					if (placeSettlement(sNode, player)) {
+						System.out.println("Settlement built on node " + cmd.getNodeId());
+					} else {
+						System.out.println("Cannot build there.");
+					}
+					break;
+				case BUILD_CITY:
+					if (!rolled) {
+						System.out.println("Roll first.");
+						break;
+					}
+					Node cNode = board.getNode(cmd.getNodeId());
+					if (cNode == null) {
+						System.out.println("Invalid node.");
+						break;
+					}
+					if (placeCity(cNode, player)) {
+						System.out.println("City built on node " + cmd.getNodeId());
+					} else {
+						System.out.println("Cannot build there.");
+					}
+					break;
+				case BUILD_ROAD:
+					if (!rolled) {
+						System.out.println("Roll first.");
+						break;
+					}
+					Edge edge = board.findEdge(cmd.getFromNodeId(), cmd.getToNodeId());
+					if (edge == null) {
+						System.out.println("No edge between those nodes.");
+						break;
+					}
+					if (placeRoad(edge, player)) {
+						System.out.println("Road built.");
+					} else {
+						System.out.println("Cannot build there.");
+					}
+					break;
+				case GO:
+					if (!rolled) {
+						System.out.println("You must roll first.");
+						break;
+					}
+					System.out.println(roundCount + " / " + player.getColor() + ": End turn.");
+					return;
+				default: System.out.println("Unknown command.");
+			}
 		}
 	}
 

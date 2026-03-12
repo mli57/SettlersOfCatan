@@ -8,7 +8,10 @@ import java.io.IOException;
  * @author Kabir Singh Sachdeva, Adrian Najmi, Sarthak Kulashari, Maxwell Li
  */
 public class Demonstrator {
-    
+
+    /** -1 = all AI; 0-3 = that player slot is human. */
+    private static final int HUMAN_PLAYER_INDEX = 0;
+
     /**
      * Main method to run the Catan game simulation.
      * @param args Command line arguments (unused)
@@ -20,21 +23,23 @@ public class Demonstrator {
             int maxRounds = ConfigReader.readTurns();
             System.out.println("=== SETTLERS OF CATAN SIMULATOR ===");
             System.out.println("Configuration: Maximum " + maxRounds + " rounds\n");
-            
+
             // Step 2: Set up the game board
             // Create board and initialize with tiles, nodes, edges
             Board board = new Board();
             IBoardGenerator generator = new RandomBoardGenerator();
             generator.generate(board);
-            
+
             // Step 3: Create game components using dependency injection
             Dice dice = new DiceRoller();          // Handles dice rolling
             Bank bank = new Bank();                // Handles resource payments
             IPlacementValidator validator = new PlacementValidator();  // Validates placements
-            
+
             // Step 4: Create game with 4 players
             Game game = new Game(board, dice, bank, validator, 4);
-            
+            if (HUMAN_PLAYER_INDEX >= 0)
+                game.setHumanPlayer(HUMAN_PLAYER_INDEX);
+
             // Step 5: Run the simulation
             // This includes:
             // - Setup phase (each player places 2 settlements + 2 roads)
@@ -42,7 +47,7 @@ public class Demonstrator {
             // - Game ends when someone reaches 10 VP or max rounds reached
             System.out.println("Starting game simulation...\n");
             game.startGame(maxRounds);
-            
+
         } catch (IOException e) {
             // Handle file reading errors
             System.err.println("ERROR: Could not read game.config file");
@@ -55,4 +60,3 @@ public class Demonstrator {
         }
     }
 }
-
