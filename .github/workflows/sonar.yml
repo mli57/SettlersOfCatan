@@ -20,12 +20,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Download JUnit Suite dependencies
-        run: |
-          curl -L -o src/lib/junit-platform-suite-api-1.11.4.jar https://repo1.maven.org/maven2/org/junit/platform/junit-platform-suite-api/1.11.4/junit-platform-suite-api-1.11.4.jar
-          curl -L -o src/lib/junit-platform-suite-engine-1.11.4.jar https://repo1.maven.org/maven2/org/junit/platform/junit-platform-suite-engine/1.11.4/junit-platform-suite-engine-1.11.4.jar
-          curl -L -o src/lib/junit-platform-suite-commons-1.11.4.jar https://repo1.maven.org/maven2/org/junit/platform/junit-platform-suite-commons/1.11.4/junit-platform-suite-commons-1.11.4.jar
-
       - name: Compile Java sources
         run: |
           mkdir -p bin
@@ -51,19 +45,6 @@ jobs:
             --sourcefiles src/SettlersOfCatan \
             --xml coverage.xml
 
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v3.1.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.projectKey=mli57_SettlersOfCatan
-            -Dsonar.organization=mli57
-            -Dsonar.sources=src/SettlersOfCatan
-            -Dsonar.tests=src/UnitTests
-            -Dsonar.java.binaries=bin
-            -Dsonar.coverage.jacoco.xmlReportPaths=coverage.xml
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v3.1.0
         env:
