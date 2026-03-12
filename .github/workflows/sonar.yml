@@ -32,7 +32,8 @@ jobs:
             -jar src/lib/junit-platform-console-standalone-1.13.0-M3.jar \
             -cp "bin:src/lib/junit-platform-suite-api-1.11.4.jar:src/lib/junit-platform-suite-engine-1.11.4.jar:src/lib/junit-platform-suite-commons-1.11.4.jar" \
             --select-class=UnitTests.CoreGameSuite \
-            --select-class=UnitTests.PlacementSuite
+            --select-class=UnitTests.PlacementSuite \
+            --select-class=UnitTests.HumanCommandParserTest
 
       - name: Generate JaCoCo XML report
         run: |
@@ -42,6 +43,7 @@ jobs:
             --classfiles bin/SettlersOfCatan/Node.class \
             --classfiles bin/SettlersOfCatan/Edge.class \
             --classfiles bin/SettlersOfCatan/PlacementValidator.class \
+            --classfiles bin/SettlersOfCatan/HumanCommandParser.class \
             --sourcefiles src/SettlersOfCatan \
             --xml coverage.xml
 
@@ -57,4 +59,4 @@ jobs:
             -Dsonar.sources=src/SettlersOfCatan
             -Dsonar.java.binaries=bin
             -Dsonar.coverage.jacoco.xmlReportPaths=coverage.xml
-            -Dsonar.inclusions=**/Bank.java,**/Player.java,**/Node.java,**/Edge.java,**/PlacementValidator.java
+            -Dsonar.inclusions=**/Bank.java,**/Player.java,**/Node.java,**/Edge.java,**/PlacementValidator.java,**/HumanCommandParser.java
