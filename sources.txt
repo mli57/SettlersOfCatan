@@ -10,6 +10,8 @@ C:\Users\adria\projects\SettlersOfCatan\src\SettlersOfCatan\Dice.java
 C:\Users\adria\projects\SettlersOfCatan\src\SettlersOfCatan\DiceRoller.java
 C:\Users\adria\projects\SettlersOfCatan\src\SettlersOfCatan\Edge.java
 C:\Users\adria\projects\SettlersOfCatan\src\SettlersOfCatan\Game.java
+C:\Users\adria\projects\SettlersOfCatan\src\SettlersOfCatan\HumanCommandParser.java
+C:\Users\adria\projects\SettlersOfCatan\src\SettlersOfCatan\HumanPlayer.java
 C:\Users\adria\projects\SettlersOfCatan\src\SettlersOfCatan\IBoardGenerator.java
 C:\Users\adria\projects\SettlersOfCatan\src\SettlersOfCatan\IPlacementValidator.java
 C:\Users\adria\projects\SettlersOfCatan\src\SettlersOfCatan\Node.java

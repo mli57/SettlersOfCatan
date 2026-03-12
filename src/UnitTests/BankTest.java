@@ -6,7 +6,7 @@
 
 package UnitTests;
 
-import static org.junit.jupiter.api.Assertions.*;       
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -68,7 +68,7 @@ public class BankTest {
         assertEquals(initialVictoryPoints + 1, player.getVictoryPoints(), "Victory points should increase by 1");
     }
 
-     /**
+    /**
      * Test 2 (Boundary case): payForSettlement fails if the player lacks at least one required resource.
      */
     @Test
@@ -103,35 +103,49 @@ public class BankTest {
         assertEquals(0, player.getResources().get(ResourceType.WHEAT), "Wheat resources should be zero after purchase");
         assertEquals(initialCities - 1, player.getBuildings().get(BuildingType.CITY), "City count should decrease by 1");
         assertEquals(initialVictoryPoints + 1, player.getVictoryPoints(), "Victory points should increase by 1");
+
+        /* Buying again with no resources left should fail */
+        assertFalse(bank.payForCity(player), "City purchase should fail when player has insufficient resources");
     }
 
     /**
-     * Test 4: payForRoad fails if the player has resources but no road pieces left.
+     * Test 4: payForRoad succeeds with sufficient resources and pieces, consuming both.
      */
     @Test
     @Timeout(value = DEFAULT_TIMEOUT, unit = TimeUnit.SECONDS)
-    public void payForRoadFailsWhenNoRoadPiecesLeft() {
+    public void payForRoadSucceedsWithExactResourcesAndPiece() {
         player.getResources().put(ResourceType.WOOD, 1);
         player.getResources().put(ResourceType.BRICK, 1);
-        player.getBuildings().put(BuildingType.ROAD, 0);
+        int initialRoads = player.getBuildings().get(BuildingType.ROAD);
 
         boolean result = bank.payForRoad(player);
 
-        assertFalse(result, "Road purchase should fail with no road pieces left");
-        assertEquals(0, player.getBuildings().get(BuildingType.ROAD), "Road count should remain zero");
+        assertTrue(result, "Road purchase should succeed with exact resources and pieces");
+        assertEquals(0, player.getResources().get(ResourceType.WOOD), "Wood resources should be zero after purchase");
+        assertEquals(0, player.getResources().get(ResourceType.BRICK), "Brick resources should be zero after purchase");
+        assertEquals(initialRoads - 1, player.getBuildings().get(BuildingType.ROAD), "Road count should decrease by 1");
     }
 
-     /**
-     * Test 5: useSettlementPieceSetup fails if the player has no settlement pieces left.
+    /**
+     * Test 5: useSettlementPieceSetup and useRoadPieceSetup succeed when pieces are available
+     * and fail when no pieces remain.
      */
     @Test
     @Timeout(value = DEFAULT_TIMEOUT, unit = TimeUnit.SECONDS)
-    public void useSettlementPieceSetupFailsWhenNoPiecesLeft() {
+    public void useSetupPiecesSucceedThenFailWhenEmpty() {
+        int initialSettlements = player.getBuildings().get(BuildingType.SETTLEMENT);
+        int initialRoads = player.getBuildings().get(BuildingType.ROAD);
+
+        assertTrue(bank.useSettlementPieceSetup(player), "Setup settlement should succeed with pieces available");
+        assertEquals(initialSettlements - 1, player.getBuildings().get(BuildingType.SETTLEMENT), "Settlement count should decrease by 1");
+
+        assertTrue(bank.useRoadPieceSetup(player), "Setup road should succeed with pieces available");
+        assertEquals(initialRoads - 1, player.getBuildings().get(BuildingType.ROAD), "Road count should decrease by 1");
+
         player.getBuildings().put(BuildingType.SETTLEMENT, 0);
+        player.getBuildings().put(BuildingType.ROAD, 0);
 
-        boolean result = bank.useSettlementPieceSetup(player);
-
-        assertFalse(result, "Settlement piece setup should fail with no pieces left");
-        assertEquals(0, player.getBuildings().get(BuildingType.SETTLEMENT), "Settlement count should remain zero");
+        assertFalse(bank.useSettlementPieceSetup(player), "Setup settlement should fail with no pieces left");
+        assertFalse(bank.useRoadPieceSetup(player), "Setup road should fail with no pieces left");
     }
 }

@@ -1,0 +1,13 @@
+# Compiled Java classes
+bin/
+
+# JaCoCo runtime files
+jacoco.exec
+jacoco.zip
+
+# Coverage reports
+coverage.xml
+coverage/
+
+# Build artifacts
+sources.txt
