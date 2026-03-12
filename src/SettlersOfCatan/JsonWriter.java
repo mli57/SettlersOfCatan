@@ -48,7 +48,7 @@ public class JsonWriter {
 	}
 
 	private static void appendTiles(Board board, StringBuilder sb) {
-		sb.append("[");
+		sb.append("[\n");
 		Tile[] tiles = board.getTiles();
 		boolean first = true;
 		if (tiles != null) {
@@ -57,9 +57,10 @@ public class JsonWriter {
 					continue;
 				}
 				if (!first) {
-					sb.append(", ");
+					sb.append(",\n");
 				}
 				first = false;
+				sb.append("    ");
 				ResourceType res = tile.produceResource();
 				boolean desert = (res == null || res == ResourceType.NULL);
 				sb.append("{ \"q\": ").append(tile.getQ());
@@ -74,7 +75,7 @@ public class JsonWriter {
 				sb.append(" }");
 			}
 		}
-		sb.append("]");
+		sb.append("\n  ]");
 	}
 
 	private static String buildStateJson(Board board) {
@@ -84,13 +85,13 @@ public class JsonWriter {
 		appendRoads(board, sb);
 		sb.append(",\n");
 		sb.append("  \"buildings\": ");
-		appendBuildings(board, sb);
+		appendBuildings(board.getNodes(), sb);
 		sb.append("\n}\n");
 		return sb.toString();
 	}
 
 	private static void appendRoads(Board board, StringBuilder sb) {
-		sb.append("[");
+		sb.append("[\n");
 		Edge[] edges = board.getEdges();
 		boolean first = true;
 		if (edges != null) {
@@ -99,21 +100,21 @@ public class JsonWriter {
 					continue;
 				}
 				if (!first) {
-					sb.append(", ");
+					sb.append(",\n");
 				}
 				first = false;
+				sb.append("    ");
 				String owner = edge.getRoad().getOwner().getColor().name();
 				sb.append("{ \"a\": ").append(edge.getNodeA().getId());
 				sb.append(", \"b\": ").append(edge.getNodeB().getId());
 				sb.append(", \"owner\": \"").append(owner).append("\" }");
 			}
 		}
-		sb.append("]");
+		sb.append("\n  ]");
 	}
 
-	private static void appendBuildings(Board board, StringBuilder sb) {
-		sb.append("[");
-		Node[] nodes = board.getNodes();
+	private static void appendBuildings(Node[] nodes, StringBuilder sb) {
+		sb.append("[\n");
 		boolean first = true;
 		if (nodes != null) {
 			for (Node node : nodes) {
@@ -121,9 +122,10 @@ public class JsonWriter {
 					continue;
 				}
 				if (!first) {
-					sb.append(", ");
+					sb.append(",\n");
 				}
 				first = false;
+				sb.append("    ");
 				String owner = node.getOccupyingPlayer().getColor().name();
 				String type = node.getBuilding() instanceof City ? "CITY" : "SETTLEMENT";
 				sb.append("{ \"node\": ").append(node.getId());
@@ -131,6 +133,6 @@ public class JsonWriter {
 				sb.append(", \"type\": \"").append(type).append("\" }");
 			}
 		}
-		sb.append("]");
+		sb.append("\n  ]");
 	}
 }

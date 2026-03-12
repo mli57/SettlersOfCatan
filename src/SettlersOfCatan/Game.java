@@ -2,6 +2,7 @@ package SettlersOfCatan;
 
 import static SettlersOfCatan.HumanCommandParser.Action.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -60,6 +61,11 @@ public class Game {
 	/** Total number of nodes on the Catan board **/
 	private static final int TOTAL_NODES = 54;
 
+	/** Path to visualizer base map JSON (board layout). **/
+	private static final String VISUALIZER_BASE_MAP_PATH = "src/SettlersOfCatan/visualize/base_map.json";
+	/** Path to visualizer state JSON (roads and buildings). **/
+	private static final String VISUALIZER_STATE_PATH = "src/SettlersOfCatan/visualize/state.json";
+
 	/**
 	 * Constructor with dependency injection.
 	 * @param board The game board
@@ -100,6 +106,18 @@ public class Game {
 	public void setHumanPlayer(int index) {
 		if (index < 0 || index >= players.length) return;
 		players[index] = new HumanPlayer(PlayerColor.values()[index]);
+	}
+
+	/**
+	 * Writes current roads and buildings to state.json for the visualizer (R2.3).
+	 * Swallows IOException so a failed write does not stop the game.
+	 */
+	private void refreshVisualizerState() {
+		try {
+			JsonWriter.writeState(board, VISUALIZER_STATE_PATH);
+		} catch (IOException e) {
+			System.err.println("Failed to write state.json: " + e.getMessage());
+		}
 	}
 
 	/**
@@ -211,6 +229,13 @@ public class Game {
 	 * @param maxRounds maximum number of rounds to play
 	 */
 	public void startGame(int maxRounds) {
+		// Write base map once so visualizer can render the board (R2.3)
+		try {
+			JsonWriter.writeBaseMap(board, VISUALIZER_BASE_MAP_PATH);
+		} catch (IOException e) {
+			System.err.println("Failed to write base_map.json: " + e.getMessage());
+		}
+
 		setupInitialSettlements();
 		
 		System.out.println("\n=== GAME START ===");
@@ -777,9 +802,9 @@ public class Game {
 		// 4. Add victory point
 		player.addVictoryPoint(1);
 
+		refreshVisualizerState();
 		return true;
 	}
-
 	/**
 	 * Orchestrates settlement placement during normal play.
 	 * GRASP: Controller - Game orchestrates the full placement flow.
@@ -814,6 +839,7 @@ public class Game {
 		node.setBuilding(new Settlement(player));
 		node.setOccupyingPlayer(player);
 
+		refreshVisualizerState();
 		return true;
 	}
 
@@ -839,6 +865,7 @@ public class Game {
 		node.setBuilding(new City(player));
 		node.setOccupyingPlayer(player);
 
+		refreshVisualizerState();
 		return true;
 	}
 
@@ -863,6 +890,7 @@ public class Game {
 		// 3. Update edge state
 		edge.setRoad(new Road(player, edge));
 
+		refreshVisualizerState();
 		return true;
 	}
 
@@ -908,6 +936,7 @@ public class Game {
 		// 3. Update edge state
 		edge.setRoad(new Road(player, edge));
 
+		refreshVisualizerState();
 		return true;
 	}
 }
