@@ -171,6 +171,36 @@ public class Player {
 	}
 
 	/**
+	 * Restores one settlement piece to the player's available inventory (for undo).
+	 */
+	public void restoreSettlementPiece() {
+		buildings.put(
+			BuildingType.SETTLEMENT,
+			buildings.get(BuildingType.SETTLEMENT) + 1
+		);
+	}
+
+	/**
+	 * Restores one city piece to the player's available inventory (for undo).
+	 */
+	public void restoreCityPiece() {
+		buildings.put(
+			BuildingType.CITY,
+			buildings.get(BuildingType.CITY) + 1
+		);
+	}
+
+	/**
+	 * Restores one road piece to the player's available inventory (for undo).
+	 */
+	public void restoreRoadPiece() {
+		buildings.put(
+			BuildingType.ROAD,
+			buildings.get(BuildingType.ROAD) + 1
+		);
+	}
+
+	/**
 	 * Adds victory points to the player.
 	 * @param points The number of victory points to add
 	 */

@@ -22,6 +22,8 @@ public final class HumanCommandParser {
     private static final Pattern ROLL = Pattern.compile("(?i)roll");
     private static final Pattern GO = Pattern.compile("(?i)go");
     private static final Pattern LIST = Pattern.compile("(?i)list");
+    private static final Pattern UNDO = Pattern.compile("(?i)undo");
+    private static final Pattern REDO = Pattern.compile("(?i)redo");
     private static final Pattern BUILD_SETTLEMENT = Pattern.compile("(?i)build\\s+settlement\\s+(\\d+)");
     private static final Pattern BUILD_CITY = Pattern.compile("(?i)build\\s+city\\s+(\\d+)");
     private static final Pattern BUILD_ROAD = Pattern.compile("(?i)build\\s+road\\s+(\\d+)\\s*,\\s*(\\d+)");
@@ -53,6 +55,12 @@ public final class HumanCommandParser {
         if (LIST.matcher(input).matches()){
             return ParsedCommand.of(Action.LIST);
         }
+        if (UNDO.matcher(input).matches()){
+            return ParsedCommand.of(Action.UNDO);
+        }
+        if (REDO.matcher(input).matches()){
+            return ParsedCommand.of(Action.REDO);
+        }
 
         Matcher m;
 
@@ -76,7 +84,7 @@ public final class HumanCommandParser {
 
 
     public enum Action {
-        ROLL, GO, LIST, BUILD_SETTLEMENT, BUILD_CITY, BUILD_ROAD, UNKNOWN
+        ROLL, GO, LIST, BUILD_SETTLEMENT, BUILD_CITY, BUILD_ROAD, UNDO, REDO, UNKNOWN
     }
 
 

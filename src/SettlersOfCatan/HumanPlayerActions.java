@@ -17,6 +17,9 @@ public class HumanPlayerActions extends PlayerActions {
 	/** Scanner for reading human player input from console **/
 	private Scanner scanner;
 
+	/** Command history for undo/redo support (R3.1) **/
+	private CommandHistory commandHistory;
+
 	/** Dice object for rolling dice **/
 	private Dice dice;
 
@@ -51,6 +54,7 @@ public class HumanPlayerActions extends PlayerActions {
 		this.diceSides = diceSides;
 		this.distributeResources = distributeResources;
 		this.handleRobber = handleRobber;
+		this.commandHistory = new CommandHistory();
 	}
 
 	/**
@@ -61,7 +65,7 @@ public class HumanPlayerActions extends PlayerActions {
 	public void humanTurn(HumanPlayer player, int roundCount) {
 		boolean rolled = false;
 		System.out.println("Your hand: " + player.formatHand());
-		System.out.println("Commands: roll | list | build settlement <id> | build city <id> | build road <fromId>,<toId> | go");
+		System.out.println("Commands: roll | list | build settlement <id> | build city <id> | build road <fromId>,<toId> | undo | redo | go");
 		while (true) {
 			System.out.print("> ");
 			HumanCommandParser.ParsedCommand cmd = HumanCommandParser.parse(scanner.nextLine());
@@ -93,7 +97,9 @@ public class HumanPlayerActions extends PlayerActions {
 						System.out.println("Invalid node.");
 						break;
 					}
-					if (placeSettlement(sNode, player)) {
+					BuildSettlementCommand bsc = new BuildSettlementCommand(sNode, player, bank, this);
+					commandHistory.pushToStack(bsc);
+					if (sNode.isOccupied()) {
 						System.out.println("Settlement built on node " + cmd.getNodeId());
 					} else {
 						System.out.println("Cannot build there.");
@@ -109,7 +115,9 @@ public class HumanPlayerActions extends PlayerActions {
 						System.out.println("Invalid node.");
 						break;
 					}
-					if (placeCity(cNode, player)) {
+					BuildCityCommand bcc = new BuildCityCommand(cNode, player, bank, this);
+					commandHistory.pushToStack(bcc);
+					if (cNode.getBuilding() instanceof City) {
 						System.out.println("City built on node " + cmd.getNodeId());
 					} else {
 						System.out.println("Cannot build there.");
@@ -125,11 +133,19 @@ public class HumanPlayerActions extends PlayerActions {
 						System.out.println("No edge between those nodes.");
 						break;
 					}
-					if (placeRoad(edge, player)) {
+					BuildRoadCommand brc = new BuildRoadCommand(edge, player, bank, this);
+					commandHistory.pushToStack(brc);
+					if (edge.getRoad() != null) {
 						System.out.println("Road built.");
 					} else {
 						System.out.println("Cannot build there.");
 					}
+					break;
+				case UNDO:
+					commandHistory.undo();
+					break;
+				case REDO:
+					commandHistory.redo();
 					break;
 				case GO:
 					if (!rolled) {

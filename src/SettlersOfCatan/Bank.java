@@ -140,6 +140,65 @@ public class Bank {
 	}
 
 	/**
+	 * Refunds the cost of a settlement to the player (for undo).
+	 * Returns WOOD, BRICK, SHEEP, and WHEAT x1 each, restores one settlement piece,
+	 * and subtracts 1 victory point.
+	 * @param player the player receiving the refund
+	 */
+	public void refundSettlement(Player player) {
+		// Return resources
+		for (Map.Entry<ResourceType, Integer> entry : SETTLEMENT_COST.entrySet()) {
+			for (int i = 0; i < entry.getValue(); i++) {
+				player.addResource(entry.getKey());
+			}
+		}
+
+		// Restore settlement piece
+		player.restoreSettlementPiece();
+
+		// Remove victory point
+		player.addVictoryPoint(-1);
+	}
+
+	/**
+	 * Refunds the cost of a city upgrade to the player (for undo).
+	 * Returns ORE x3 and WHEAT x2, restores one city piece,
+	 * and subtracts 1 victory point.
+	 * @param player the player receiving the refund
+	 */
+	public void refundCity(Player player) {
+		// Return resources
+		for (Map.Entry<ResourceType, Integer> entry : CITY_COST.entrySet()) {
+			for (int i = 0; i < entry.getValue(); i++) {
+				player.addResource(entry.getKey());
+			}
+		}
+
+		// Restore city piece
+		player.restoreCityPiece();
+
+		// Remove victory point
+		player.addVictoryPoint(-1);
+	}
+
+	/**
+	 * Refunds the cost of a road to the player (for undo).
+	 * Returns WOOD x1 and BRICK x1, and restores one road piece.
+	 * @param player the player receiving the refund
+	 */
+	public void refundRoad(Player player) {
+		// Return resources
+		for (Map.Entry<ResourceType, Integer> entry : ROAD_COST.entrySet()) {
+			for (int i = 0; i < entry.getValue(); i++) {
+				player.addResource(entry.getKey());
+			}
+		}
+
+		// Restore road piece
+		player.restoreRoadPiece();
+	}
+
+	/**
 	 * Gets the cost for a settlement.
 	 * @return unmodifiable map of resource costs
 	 */
