@@ -38,7 +38,7 @@ public class Player {
 		
 		// Set all resources to zero initially
 		for (int i = 0; i<ResourceType.values().length; i++){
-			resources.put(ResourceType.values()[i], 5);
+			resources.put(ResourceType.values()[i], 0);
 		}
 		
 		// Initialize building counts (starting pieces)
