@@ -329,15 +329,17 @@ public class Game {
 
 				System.out.println("\n--- " + player.getColor() + " Player's Turn ---");
 
-				// Roll dice for this turn
-				int diceRoll = dice.rollTwoDice(DICE_SIDES);
-				System.out.println("Dice roll: " + diceRoll);
+				// Human players roll via the "roll" console command inside humanTurn.
+				// AI players have the dice rolled automatically here.
+				if (!(player instanceof HumanPlayer)) {
+					int diceRoll = dice.rollTwoDice(DICE_SIDES);
+					System.out.println("Dice roll: " + diceRoll);
 
-				// Distribute resources or handle robber on 7
-				if (diceRoll == 7) {
-					handleRobber(player);
-				} else {
-					distributeResources(diceRoll);
+					if (diceRoll == 7) {
+						handleRobber(player);
+					} else {
+						distributeResources(diceRoll);
+					}
 				}
 
 				// Player actions - build or pass
