@@ -41,7 +41,7 @@ public class CommandHistory {
      * Prints "Nothing to undo." if no commands are in history.
      */
     public void undo() {
-        if (history.isEmpty()) {
+        if (!canUndo()) {
             System.out.println("Nothing to undo.");
             return;
         }
@@ -55,7 +55,7 @@ public class CommandHistory {
      * Prints "Nothing to redo." if no commands are in the redo stack.
      */
     public void redo() {
-        if (redoStack.isEmpty()) {
+        if (!canRedo()) {
             System.out.println("Nothing to redo.");
             return;
         }
