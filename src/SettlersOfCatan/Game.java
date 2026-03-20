@@ -71,6 +71,9 @@ public class Game {
 	/** Actions handler for human player interactive turns **/
 	private HumanPlayerActions humanActions;
 
+	/** Rule-based AI action chain (Chain of Responsibility). **/
+	private ActionHandler agentChain;
+
 	/**
 	 * Constructor with dependency injection.
 	 * @param board The game board
@@ -96,6 +99,24 @@ public class Game {
 		this.actions = new PlayerActions(board, bank, validator, players, random);
 		this.humanActions = new HumanPlayerActions(board, bank, validator, players, random,
 				scanner, dice, DICE_SIDES, this::distributeResources, this::handleRobber);
+		buildAgentChain();
+	}
+
+	/**
+	 * Builds the Chain of Responsibility for AI decisions.
+	 * Order: OverHandSize -> ConnectRoads -> DefendRoad -> ValueScoring.
+	 */
+	private void buildAgentChain() {
+		ActionHandler overHandSize = new OverHandSizeHandler(random);
+		ActionHandler connectRoads = new ConnectRoadsHandler(board, random);
+		ActionHandler defendRoad = new DefendRoadHandler(players, board, random);
+		ActionHandler valueScoring = new ValueScoringHandler(random);
+
+		overHandSize.setSuccessor(connectRoads);
+		connectRoads.setSuccessor(defendRoad);
+		defendRoad.setSuccessor(valueScoring);
+
+		this.agentChain = overHandSize;
 	}
 
 	/**
@@ -356,33 +377,7 @@ public class Game {
 			humanActions.humanTurn((HumanPlayer) player, roundCount);
 			return;
 		}
-
-		// AI path: unchanged from A1
-		boolean mustBuild = actions.getTotalResourceCount(player) >= PlayerActions.MAX_RESOURCES_BEFORE_BUILD;
-		List<String> availableActions = actions.getAvailableActions(player, mustBuild);
-
-		if (availableActions.isEmpty()) {
-			System.out.println(player.getColor() + " - No available actions");
-			return;
-		}
-
-		// Choose randomly from available actions
-		String action = availableActions.get(random.nextInt(availableActions.size()));
-
-		switch (action) {
-			case "SETTLEMENT":
-				actions.buildSettlement(player, roundCount);
-				break;
-			case "CITY":
-				actions.buildCity(player, roundCount);
-				break;
-			case "ROAD":
-				actions.buildRoad(player, roundCount);
-				break;
-			case "PASS":
-				System.out.println(roundCount + " / " + player.getColor() + ": Pass");
-				break;
-		}
+		agentChain.handleTurn(player, actions, roundCount);
 	}
 
 	/**
