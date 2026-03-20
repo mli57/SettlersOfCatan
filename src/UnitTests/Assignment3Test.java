@@ -95,7 +95,7 @@ public class Assignment3Test {
         @Override public void buildCity(Player p, int r)       { buildCityCalled = true; }
 
         /** No-op: prevents file I/O during unit tests. */
-        @Override void refreshVisualizerState() {}
+        @Override protected void refreshVisualizerState() {}
     }
 
     /**
