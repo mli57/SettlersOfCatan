@@ -1,8 +1,10 @@
 package SettlersOfCatan;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Set;
 
 /**
  * Main game controller that orchestrates the Settlers of Catan game flow.
@@ -46,6 +48,9 @@ public class Game {
 
 	/** Scanner for reading human player input from console **/
 	private final Scanner scanner = new Scanner(System.in);
+
+	/** Index of the tile currently holding the Robber (R2.5); -1 means unset. **/
+	private int robberTileIndex = -1;
 
 	/** Victory points needed to win the game **/
 	private static final int VICTORY_POINTS_TO_WIN = 10;
@@ -109,6 +114,18 @@ public class Game {
 	public void setHumanPlayer(int index) {
 		if (index < 0 || index >= players.length) return;
 		players[index] = new HumanPlayer(PlayerColor.values()[index]);
+	}
+
+	/**
+	 * Writes current roads and buildings to state.json for the visualizer (R2.3).
+	 * Swallows IOException so a failed write does not stop the game.
+	 */
+	private void refreshVisualizerState() {
+		try {
+			JsonWriter.writeState(board, VISUALIZER_STATE_PATH);
+		} catch (IOException e) {
+			System.err.println("Failed to write state.json: " + e.getMessage());
+		}
 	}
 
 	/**
@@ -220,6 +237,13 @@ public class Game {
 	 * @param maxRounds maximum number of rounds to play
 	 */
 	public void startGame(int maxRounds) {
+		// Write base map once so visualizer can render the board (R2.3)
+		try {
+			JsonWriter.writeBaseMap(board, VISUALIZER_BASE_MAP_PATH);
+		} catch (IOException e) {
+			System.err.println("Failed to write base_map.json: " + e.getMessage());
+		}
+
 		setupInitialSettlements();
 
 		System.out.println("\n=== GAME START ===");
