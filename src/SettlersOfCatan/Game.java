@@ -90,7 +90,7 @@ public class Game {
 		this.players = new Player[numPlayers];
 		this.random = new Random();
 		this.currentPlayer = 0;
-		this.roundCount = 0;
+		this.roundCount = 1;
 
 		// Initialize players
 		initializePlayers();
