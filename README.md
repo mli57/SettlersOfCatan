@@ -8,4 +8,7 @@ Up to 4 players compete to build settlements, cities, and roads on an island. Re
 
 Settlers of Catan board game coded in Java.
 
+To run the terminal code:
+```java .\src\SettlersOfCatan\Demonstrator.java```
+
 Kanban Board: https://github.com/users/Kabir-88/projects/1
