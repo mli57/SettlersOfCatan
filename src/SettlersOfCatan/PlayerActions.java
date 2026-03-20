@@ -56,7 +56,7 @@ public class PlayerActions {
 	 * Writes current roads and buildings to state.json for the visualizer (R2.3).
 	 * Swallows IOException so a failed write does not stop the game.
 	 */
-	void refreshVisualizerState() {
+	protected void refreshVisualizerState() {
 		try {
 			JsonWriter.writeState(board, VISUALIZER_STATE_PATH);
 		} catch (IOException e) {
