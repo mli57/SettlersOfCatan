@@ -1,5 +1,11 @@
 package SettlersOfCatan;
 
+import static SettlersOfCatan.HumanCommandParser.Action.*;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -9,8 +15,6 @@ import java.util.Set;
 /**
  * Main game controller that orchestrates the Settlers of Catan game flow.
  * Handles setup phase, game loop, resource distribution, and player actions.
- * Delegates all placement operations and board queries to {@link PlayerActions},
- * and console input handling for human players to {@link HumanPlayerActions}.
  * @author Kabir Singh Sachdeva, Adrian Najmi, Sarthak Kulashari, Maxwell Li
  */
 public class Game {
@@ -24,13 +28,13 @@ public class Game {
 	public Board getBoard() {
 		return board;
 	}
-
+	
 	/** Array of all players in the game **/
 	private Player[] players;
-
+	
 	/** Index of the current player whose turn it is **/
 	private int currentPlayer;
-
+	
 	/** Current round number (starts at 0) **/
 	private int roundCount;
 
@@ -54,21 +58,20 @@ public class Game {
 
 	/** Victory points needed to win the game **/
 	private static final int VICTORY_POINTS_TO_WIN = 10;
-
+	
 	/** Maximum resources a player can have before being forced to build **/
 	private static final int MAX_RESOURCES_BEFORE_BUILD = 7;
-
+	
 	/** Number of sides on each die **/
 	private static final int DICE_SIDES = 6;
-
+	
 	/** Total number of nodes on the Catan board **/
 	private static final int TOTAL_NODES = 54;
 
-	/** Encapsulates placement operations and board-query helpers for AI and setup **/
-	private PlayerActions actions;
-
-	/** Handles the interactive console turn for human players **/
-	private HumanPlayerActions humanActions;
+	/** Path to visualizer base map JSON (board layout). **/
+	private static final String VISUALIZER_BASE_MAP_PATH = "src/SettlersOfCatan/visualize/base_map.json";
+	/** Path to visualizer state JSON (roads and buildings). **/
+	private static final String VISUALIZER_STATE_PATH = "src/SettlersOfCatan/visualize/state.json";
 
 	/**
 	 * Constructor with dependency injection.
@@ -87,13 +90,9 @@ public class Game {
 		this.random = new Random();
 		this.currentPlayer = 0;
 		this.roundCount = 0;
-
+		
 		// Initialize players
 		initializePlayers();
-
-		this.actions = new PlayerActions(board, bank, validator, players, random);
-		this.humanActions = new HumanPlayerActions(board, bank, validator, players, random,
-				scanner, dice, DICE_SIDES, this::distributeResources);
 	}
 
 	/**
@@ -137,70 +136,130 @@ public class Game {
 			Player player = players[i]; // Current player setting up
 			System.out.println("\n=== " + player.getColor() + " Player Setup ===");
 
-			// Place first settlement
-			doSetupSettlement(player, 1);
+			if (player instanceof HumanPlayer) {
+				setupInitialSettlementsHuman((HumanPlayer) player);
+			} else {
+				// AI setup: automated placement
+				placeSettlement(player, i, 1);
+				
+				// Place first road
+				placeRoad(player, i, 1);
+				
+				// Place second settlement
+				placeSettlement(player, i, 2);
+				
+				// Place second road
+				placeRoad(player, i, 2);
+			}
+		}
+	}
 
-			// Place first road
-			doSetupRoad(player, 1);
+	/**
+	 * Setup phase for a human player: interactively place 2 settlements and 2 roads.
+	 * Uses the same command syntax as the main human turn but only allows
+	 * build settlement / build road during setup.
+	 *
+	 * Order: Settlement 1, Road 1, Settlement 2, Road 2.
+	 * @param player the human player setting up
+	 */
+	private void setupInitialSettlementsHuman(HumanPlayer player) {
+		for (int n = 1; n <= 2; n++) {
+			// Settlement n
+			while (true) {
+				System.out.println("Place settlement #" + n + " (command: build settlement <nodeId>):");
+				System.out.print("> ");
+				HumanCommandParser.ParsedCommand cmd = HumanCommandParser.parse(scanner.nextLine());
+				if (cmd.getAction() != BUILD_SETTLEMENT) {
+					System.out.println("Please use: build settlement <nodeId>");
+					continue;
+				}
+				Node node = board.getNode(cmd.getNodeId());
+				if (node == null) {
+					System.out.println("Invalid node.");
+					continue;
+				}
+				if (placeSettlementSetup(node, player)) {
+					System.out.println("Settlement built on node " + cmd.getNodeId());
+					break;
+				} else {
+					System.out.println("Cannot build settlement there. Try another node.");
+				}
+			}
 
-			// Place second settlement
-			doSetupSettlement(player, 2);
-
-			// Place second road
-			doSetupRoad(player, 2);
+			// Road n
+			while (true) {
+				System.out.println("Place road #" + n + " (command: build road <fromNodeId>,<toNodeId>):");
+				System.out.print("> ");
+				HumanCommandParser.ParsedCommand cmd = HumanCommandParser.parse(scanner.nextLine());
+				if (cmd.getAction() != BUILD_ROAD) {
+					System.out.println("Please use: build road <fromNodeId>,<toNodeId>");
+					continue;
+				}
+				Edge edge = board.findEdge(cmd.getFromNodeId(), cmd.getToNodeId());
+				if (edge == null) {
+					System.out.println("No edge between those nodes.");
+					continue;
+				}
+				if (placeRoadSetup(edge, player)) {
+					System.out.println("Road built from node " + cmd.getFromNodeId() + " to node " + cmd.getToNodeId());
+					break;
+				} else {
+					System.out.println("Cannot build road there. Try another pair of nodes.");
+				}
+			}
 		}
 	}
 
 	/**
 	 * Places one settlement for a player during setup (random choice).
-	 * Delegates board queries and placement to {@link PlayerActions}.
 	 * @param player The player placing the settlement
+	 * @param playerIndex The index of the player in the players array
 	 * @param settlementNumber Which settlement this is (1 or 2)
 	 */
-	private void doSetupSettlement(Player player, int settlementNumber) {
+	private void placeSettlement(Player player, int playerIndex, int settlementNumber) {
 		// Get all available nodes (following distance rule)
-		List<Integer> availableNodes = actions.getAvailableSettlementNodes();
-
+		List<Integer> availableNodes = getAvailableSettlementNodes();
+		
 		if (availableNodes.isEmpty()) {
 			System.out.println(player.getColor() + " - No available nodes for settlement #" + settlementNumber);
 			return;
 		}
-
+		
 		// Choose randomly from available nodes
 		int nodeId = availableNodes.get(random.nextInt(availableNodes.size()));
 		Node node = board.getNode(nodeId);
-
-		if (node != null && actions.placeSettlementSetup(node, player)) {
+		
+		if (node != null && placeSettlementSetup(node, player)) {
 			System.out.println(roundCount + " / " + player.getColor() + ": Placed settlement #" + settlementNumber + " on node " + nodeId);
 		}
 	}
 
 	/**
 	 * Places one road for a player during setup (random choice).
-	 * Delegates board queries and placement to {@link PlayerActions}.
 	 * @param player The player placing the road
+	 * @param playerIndex The index of the player in the players array
 	 * @param roadNumber Which road this is (1 or 2)
 	 */
-	private void doSetupRoad(Player player, int roadNumber) {
+	private void placeRoad(Player player, int playerIndex, int roadNumber) {
 		// Get all nodes the player occupies
-		List<Integer> occupiedNodes = actions.getOccupiedNodeIds(player);
-
+		List<Integer> occupiedNodes = getOccupiedNodeIds(player);
+		
 		if (occupiedNodes.isEmpty()) {
 			System.out.println(player.getColor() + " - No settlements to build roads from");
 			return;
 		}
-
+		
 		// Choose random starting node from player's settlements
 		int firstNodeId = occupiedNodes.get(random.nextInt(occupiedNodes.size()));
-
+		
 		// Get adjacent unoccupied nodes
-		List<Integer> adjacentUnoccupied = actions.getAdjacentUnoccupiedNodeIds(firstNodeId);
-
+		List<Integer> adjacentUnoccupied = getAdjacentUnoccupiedNodeIds(firstNodeId);
+		
 		if (adjacentUnoccupied.isEmpty()) {
 			// Try another occupied node if first one has no adjacent unoccupied nodes
 			for (int occupiedId : occupiedNodes) {
 				if (occupiedId != firstNodeId) {
-					adjacentUnoccupied = actions.getAdjacentUnoccupiedNodeIds(occupiedId);
+					adjacentUnoccupied = getAdjacentUnoccupiedNodeIds(occupiedId);
 					if (!adjacentUnoccupied.isEmpty()) {
 						firstNodeId = occupiedId;
 						break;
@@ -208,18 +267,18 @@ public class Game {
 				}
 			}
 		}
-
+		
 		if (adjacentUnoccupied.isEmpty()) {
 			System.out.println(player.getColor() + " - No available adjacent nodes for road #" + roadNumber);
 			return;
 		}
-
+		
 		// Choose random destination node
 		int secondNodeId = adjacentUnoccupied.get(random.nextInt(adjacentUnoccupied.size()));
-
+		
 		// Find the edge between the two nodes
 		Edge edge = board.findEdge(firstNodeId, secondNodeId);
-		if (edge != null && actions.placeRoadSetup(edge, player)) {
+		if (edge != null && placeRoadSetup(edge, player)) {
 			System.out.println(roundCount + " / " + player.getColor() + ": Placed road #" + roadNumber + " from node " + firstNodeId + " to node " + secondNodeId);
 		}
 	}
@@ -245,9 +304,9 @@ public class Game {
 		}
 
 		setupInitialSettlements();
-
+		
 		System.out.println("\n=== GAME START ===");
-
+		
 		// Game loop - continue until someone wins or max rounds reached
 		while (getWinner() == null) {
 			// Check if we've reached max rounds before starting this round
@@ -264,43 +323,47 @@ public class Game {
 				System.out.println(winner.getColor() + " Player wins with " + winner.getVictoryPoints() + " victory points!");
 				return;
 			}
-
+			
 			// Process each player's turn in this round
 			for (int i = 0; i < players.length; i++) {
 				currentPlayer = i;
 				Player player = players[i];
-
+				
 				// Check for winner before each turn
 				if (getWinner() != null) {
 					break;
 				}
-
+				
 				System.out.println("\n--- " + player.getColor() + " Player's Turn ---");
-
+				
 				// Roll dice for this turn
 				int diceRoll = dice.rollTwoDice(DICE_SIDES);
 				System.out.println("Dice roll: " + diceRoll);
-
-		// Distribute resources to all players
-		distributeResources(diceRoll);
-
-		// Player actions - build or pass
-		playerTurn(player, i);
-
-		// End of turn processing
+				
+				// Distribute resources or handle robber on 7
+				if (diceRoll == 7) {
+					handleRobber(player);
+				} else {
+					distributeResources(diceRoll);
+				}
+				
+				// Player actions - build or pass
+				playerTurn(player, i);
+				
+				// End of turn processing
 			}
-
+			
 			// Print victory points at end of round (R1.7 requirement)
 			System.out.println("\n=== End of Round " + roundCount + " - Victory Points ===");
 			for (int i = 0; i < players.length; i++) {
 				System.out.println(players[i].getColor() + " Player: " + players[i].getVictoryPoints() + " VP");
 			}
 			System.out.println();
-
+			
 			// Increment round counter after all players have taken their turn
 			roundCount++;
 		}
-
+		
 		// Game over - determine winner
 		Player winner = getWinner();
 		if (winner != null) {
@@ -311,43 +374,350 @@ public class Game {
 
 	/**
 	 * Handles a player's turn.
-	 * If the player is a HumanPlayer, delegates to {@link HumanPlayerActions#humanTurn}.
-	 * Otherwise the agent picks randomly from available actions via {@link PlayerActions}.
+	 * If the player is a HumanPlayer, reads commands from the console.
+	 * Otherwise the agent picks randomly from available actions.
 	 * @param player The player whose turn it is
 	 * @param playerIndex The index of the player in the players array
 	 */
 	private void playerTurn(Player player, int playerIndex) {
 		if (player instanceof HumanPlayer) {
-			humanActions.humanTurn((HumanPlayer) player, roundCount);
+			humanTurn((HumanPlayer) player);
 			return;
 		}
-
-		// AI path: delegate entirely to PlayerActions
-		boolean mustBuild = actions.getTotalResourceCount(player) >= MAX_RESOURCES_BEFORE_BUILD;
-		List<String> availableActions = actions.getAvailableActions(player, mustBuild);
-
+		
+		// AI path: unchanged from A1
+		boolean mustBuild = getTotalResourceCount(player) >= MAX_RESOURCES_BEFORE_BUILD;
+		List<String> availableActions = getAvailableActions(player, mustBuild);
+		
 		if (availableActions.isEmpty()) {
 			System.out.println(player.getColor() + " - No available actions");
 			return;
 		}
-
+		
 		// Choose randomly from available actions
 		String action = availableActions.get(random.nextInt(availableActions.size()));
-
+		
 		switch (action) {
 			case "SETTLEMENT":
-				actions.buildSettlement(player, roundCount);
+				buildSettlement(player, playerIndex);
 				break;
 			case "CITY":
-				actions.buildCity(player, roundCount);
+				buildCity(player, playerIndex);
 				break;
 			case "ROAD":
-				actions.buildRoad(player, roundCount);
+				buildRoad(player, playerIndex);
 				break;
 			case "PASS":
 				System.out.println(roundCount + " / " + player.getColor() + ": Pass");
 				break;
 		}
+	}
+
+	/**
+	 * Human turn loop: reads console commands until "go" is typed.
+	 * @param player the player whose turn it is
+	 */
+	private void humanTurn(HumanPlayer player) {
+		boolean rolled = false;
+		System.out.println("Your hand: " + player.formatHand());
+		System.out.println("Commands: roll | list | build settlement <id> | build city <id> | build road <fromId>,<toId> | go");
+		while (true) {
+			System.out.print("> ");
+			HumanCommandParser.ParsedCommand cmd = HumanCommandParser.parse(scanner.nextLine());
+			switch (cmd.getAction()) {
+				case ROLL:
+					if (rolled) {
+						System.out.println("Already rolled.");
+						break;
+					}
+					int roll = dice.rollTwoDice(DICE_SIDES);
+					System.out.println(roundCount + " / " + player.getColor() + ": Rolled " + roll);
+					if (roll == 7) {
+						handleRobber(player);
+					} else {
+						distributeResources(roll);
+					}
+					rolled = true;
+					break;
+				case LIST:
+					System.out.println("Hand: " + player.formatHand());
+					break;
+				case BUILD_SETTLEMENT:
+					if (!rolled) {
+						System.out.println("Roll first.");
+						break;
+					}
+					Node sNode = board.getNode(cmd.getNodeId());
+					if (sNode == null) {
+						System.out.println("Invalid node.");
+						break;
+					}
+					if (placeSettlement(sNode, player)) {
+						System.out.println("Settlement built on node " + cmd.getNodeId());
+					} else {
+						System.out.println("Cannot build there.");
+					}
+					break;
+				case BUILD_CITY:
+					if (!rolled) {
+						System.out.println("Roll first.");
+						break;
+					}
+					Node cNode = board.getNode(cmd.getNodeId());
+					if (cNode == null) {
+						System.out.println("Invalid node.");
+						break;
+					}
+					if (placeCity(cNode, player)) {
+						System.out.println("City built on node " + cmd.getNodeId());
+					} else {
+						System.out.println("Cannot build there.");
+					}
+					break;
+				case BUILD_ROAD:
+					if (!rolled) {
+						System.out.println("Roll first.");
+						break;
+					}
+					Edge edge = board.findEdge(cmd.getFromNodeId(), cmd.getToNodeId());
+					if (edge == null) {
+						System.out.println("No edge between those nodes.");
+						break;
+					}
+					if (placeRoad(edge, player)) {
+						System.out.println("Road built.");
+					} else {
+						System.out.println("Cannot build there.");
+					}
+					break;
+				case GO:
+					if (!rolled) {
+						System.out.println("You must roll first.");
+						break;
+					}
+					System.out.println(roundCount + " / " + player.getColor() + ": End turn.");
+					return;
+				default: System.out.println("Unknown command.");
+			}
+		}
+	}
+
+	/**
+	 * Handles the Robber mechanism for a roll of 7 (R2.5) with assignment simplifications.
+	 * 1) Players with more than 7 cards discard down to 7 (randomly).
+	 * 2) Robber moves to a random tile (different from current).
+	 * 3) Active player steals one random card from a random qualifying adjacent player.
+	 * @param activePlayer the player who rolled 7
+	 */
+	private void handleRobber(Player activePlayer) {
+
+		// Step 1 — Card discard
+		for (Player p : players) {
+			int total = p.getTotalResourceCount();
+			if (total <= 7) {
+				continue;
+			}
+
+			int toDiscard = total - 7;
+			List<ResourceType> cards = new ArrayList<>();
+			for (Map.Entry<ResourceType, Integer> entry : p.getResources().entrySet()) {
+				ResourceType type = entry.getKey();
+				if (type == ResourceType.NULL) {
+					continue;
+				}
+				for (int i = 0; i < entry.getValue(); i++) {
+					cards.add(type);
+				}
+			}
+
+			Collections.shuffle(cards, random);
+			for (int i = 0; i < toDiscard && i < cards.size(); i++) {
+				p.removeResource(cards.get(i), 1);
+			}
+		}
+
+		// Step 2 — Robber placement
+		Tile[] tiles = board.getTiles();
+		if (tiles == null || tiles.length == 0) {
+			return;
+		}
+
+		int newIndex = robberTileIndex;
+		if (tiles.length == 1) {
+			newIndex = 0;
+		} else {
+			while (newIndex == robberTileIndex) {
+				newIndex = random.nextInt(tiles.length);
+			}
+		}
+
+		robberTileIndex = newIndex;
+		System.out.println(roundCount + " / ROBBER: Moved to tile " + robberTileIndex);
+
+		// Step 3 — Steal a card
+		Tile robberTile = tiles[robberTileIndex];
+		int[] nodeIds = robberTile.getNodeIds();
+
+		Set<Player> uniqueVictims = new HashSet<>();
+		for (int nodeId : nodeIds) {
+			Node node = board.getNode(nodeId);
+			if (node == null) {
+				continue;
+			}
+			if (!node.isOccupied()) {
+				continue;
+			}
+
+			Player owner = node.getOccupyingPlayer();
+			if (owner == null) {
+				continue;
+			}
+			if (owner == activePlayer) {
+				continue;
+			}
+
+			uniqueVictims.add(owner);
+		}
+
+		if (uniqueVictims.isEmpty()) {
+			return;
+		}
+
+		List<Player> victims = new ArrayList<>(uniqueVictims);
+		Player victim = victims.get(random.nextInt(victims.size()));
+
+		List<ResourceType> victimCards = new ArrayList<>();
+		for (Map.Entry<ResourceType, Integer> entry : victim.getResources().entrySet()) {
+			ResourceType type = entry.getKey();
+			if (type == ResourceType.NULL) {
+				continue;
+			}
+			for (int i = 0; i < entry.getValue(); i++) {
+				victimCards.add(type);
+			}
+		}
+
+		if (victimCards.isEmpty()) {
+			return;
+		}
+
+		ResourceType stolen = victimCards.get(random.nextInt(victimCards.size()));
+		if (victim.removeResource(stolen, 1)) {
+			activePlayer.addResource(stolen);
+			System.out.println(roundCount + " / " + activePlayer.getColor() + ": Stole from " + victim.getColor());
+		}
+	}
+
+	/**
+	 * Gets available actions for a player based on their resources and board state.
+	 * @param player The player to check actions for
+	 * @param mustBuild Whether the player is forced to build (7+ resources)
+	 * @return List of available action strings
+	 */
+	private List<String> getAvailableActions(Player player, boolean mustBuild) {
+		List<String> actions = new ArrayList<>();
+		
+		// Check if can build settlement
+		if (player.canBuildSettlement() && !getAvailableSettlementNodesForPlayer(player).isEmpty()) {
+			actions.add("SETTLEMENT");
+		}
+		
+		// Check if can build city
+		if (player.canBuildCity() && !getUpgradeableCityNodes(player).isEmpty()) {
+			actions.add("CITY");
+		}
+		
+		// Check if can build road
+		if (player.canBuildRoad() && !getAvailableRoadEdgesForPlayer(player).isEmpty()) {
+			actions.add("ROAD");
+		}
+		
+		// Can pass only if not forced to build
+		if (!mustBuild) {
+			actions.add("PASS");
+		}
+		
+		return actions;
+	}
+
+	/**
+	 * Player builds a settlement (random choice from available locations).
+	 * @param player The player building the settlement
+	 * @param playerIndex The index of the player in the players array
+	 */
+	private void buildSettlement(Player player, int playerIndex) {
+		List<Integer> availableNodes = getAvailableSettlementNodesForPlayer(player);
+		
+		if (availableNodes.isEmpty()) {
+			System.out.println(player.getColor() + " - Cannot build settlement (no valid locations)");
+			return;
+		}
+		
+		// Choose random node from available options
+		int nodeId = availableNodes.get(random.nextInt(availableNodes.size()));
+		Node node = board.getNode(nodeId);
+		
+		if (node != null && placeSettlement(node, player)) {
+			System.out.println(roundCount + " / " + player.getColor() + ": Built settlement on node " + nodeId);
+		} else {
+			System.out.println(roundCount + " / " + player.getColor() + ": Failed to build settlement");
+		}
+	}
+
+	/**
+	 * Player builds a city (random choice from available locations).
+	 * @param player The player building the city
+	 * @param playerIndex The index of the player in the players array
+	 */
+	private void buildCity(Player player, int playerIndex) {
+		List<Integer> upgradeableNodes = getUpgradeableCityNodes(player);
+		
+		if (upgradeableNodes.isEmpty()) {
+			System.out.println(player.getColor() + " - Cannot build city (no settlements to upgrade)");
+			return;
+		}
+		
+		// Choose random settlement to upgrade
+		int nodeId = upgradeableNodes.get(random.nextInt(upgradeableNodes.size()));
+		Node node = board.getNode(nodeId);
+		
+		if (node != null && placeCity(node, player)) {
+			System.out.println(roundCount + " / " + player.getColor() + ": Built city on node " + nodeId);
+		} else {
+			System.out.println(roundCount + " / " + player.getColor() + ": Failed to build city");
+		}
+	}
+
+	/**
+	 * Player builds a road (random choice from available locations).
+	 * @param player The player building the road
+	 * @param playerIndex The index of the player in the players array
+	 */
+	private void buildRoad(Player player, int playerIndex) {
+		List<Edge> availableEdges = getAvailableRoadEdgesForPlayer(player);
+		
+		if (availableEdges.isEmpty()) {
+			System.out.println(player.getColor() + " - Cannot build road (no valid locations)");
+			return;
+		}
+		
+		// Choose random edge from available options
+		Edge edge = availableEdges.get(random.nextInt(availableEdges.size()));
+		
+		if (placeRoad(edge, player)) {
+			System.out.println(roundCount + " / " + player.getColor() + ": Built road on edge " + edge.getId());
+		} else {
+			System.out.println(roundCount + " / " + player.getColor() + ": Failed to build road");
+		}
+	}
+
+	/**
+	 * Gets total resource count for a player.
+	 * @param player The player to check
+	 * @return The total number of resource cards the player has
+	 */
+	private int getTotalResourceCount(Player player) {
+		return player.getTotalResourceCount();
 	}
 
 	/**
@@ -361,13 +731,13 @@ public class Game {
 		if (diceRoll == 7) {
 			return;
 		}
-
+		
 		// Process all tiles on the board
 		for (Tile tile : board.getTiles()) {
 			if (tile.getNumber() == diceRoll) {
 				ResourceType resource = tile.produceResource();
 				if (resource == ResourceType.NULL) continue;
-
+				
 				// Check all nodes touching this tile
 				int[] nodeIds = tile.getNodeIds();
 				for (int nodeId : nodeIds) {
@@ -393,6 +763,177 @@ public class Game {
 	}
 
 	/**
+	 * Gets all available nodes for settlement placement (setup phase - distance rule only).
+	 * @return List of node IDs where a settlement can be placed
+	 */
+	private List<Integer> getAvailableSettlementNodes() {
+		List<Integer> available = new ArrayList<>();
+		
+		// Check all nodes on the board
+		for (int i = 0; i < TOTAL_NODES; i++) {
+			Node node = board.getNode(i);
+			if (node != null && node.canPlaceBuilding()) {
+				available.add(i);
+			}
+		}
+		
+		return available;
+	}
+
+	/**
+	 * Gets available settlement nodes for a player during normal play (must be connected by road).
+	 * @param player The player looking for settlement locations
+	 * @return List of node IDs where the player can build a settlement
+	 */
+	private List<Integer> getAvailableSettlementNodesForPlayer(Player player) {
+		List<Integer> available = new ArrayList<>();
+		
+		// Check all nodes on the board
+		for (int i = 0; i < TOTAL_NODES; i++) {
+			Node node = board.getNode(i);
+			if (node != null && validator.canPlaceSettlement(node, player, false) && player.canBuildSettlement()) {
+				// Check if player has a road leading to this node
+				boolean hasRoadConnection = false;
+				for (Edge edge : board.getEdges()) {
+					if (edge != null && edge.touches(node) && edge.getRoad() != null && edge.getRoad().getOwner() == player) {
+						hasRoadConnection = true;
+						break;
+					}
+				}
+				if (hasRoadConnection) {
+					available.add(i);
+				}
+			}
+		}
+		
+		return available;
+	}
+
+	/**
+	 * Gets nodes where player can upgrade settlement to city.
+	 * @param player The player looking for upgrade locations
+	 * @return List of node IDs where the player can upgrade to a city
+	 */
+	private List<Integer> getUpgradeableCityNodes(Player player) {
+		List<Integer> upgradeable = new ArrayList<>();
+		
+		// Check all nodes for settlements owned by this player
+		for (int i = 0; i < TOTAL_NODES; i++) {
+			Node node = board.getNode(i);
+			if (node != null && validator.canPlaceCity(node, player) && player.canBuildCity()) {
+				upgradeable.add(i);
+			}
+		}
+		
+		return upgradeable;
+	}
+
+	/**
+	 * Gets available road edges for a player (connected to their roads/settlements).
+	 * @param player The player looking for road locations
+	 * @return List of edges where the player can build a road
+	 */
+	private List<Edge> getAvailableRoadEdgesForPlayer(Player player) {
+		List<Edge> available = new ArrayList<>();
+		
+		// Get all edges that can be reached from player's buildings or roads
+		for (Edge edge : board.getEdges()) {
+			if (edge != null && edge.canPlaceRoad() && player.canBuildRoad()) {
+				Node nodeA = edge.getNodeA();
+				Node nodeB = edge.getNodeB();
+				
+				// Check if edge is adjacent to player's building
+				boolean adjacentToBuilding = (nodeA.isOccupied() && nodeA.getOccupyingPlayer() == player) ||
+											(nodeB.isOccupied() && nodeB.getOccupyingPlayer() == player);
+				
+				// Check if edge is adjacent to player's road
+				boolean adjacentToRoad = false;
+				for (Edge otherEdge : board.getEdges()) {
+					if (otherEdge != null && otherEdge != edge && otherEdge.getRoad() != null && 
+						otherEdge.getRoad().getOwner() == player) {
+						if (edge.touches(otherEdge.getNodeA()) || edge.touches(otherEdge.getNodeB())) {
+							adjacentToRoad = true;
+							break;
+						}
+					}
+				}
+				
+				if (adjacentToBuilding || adjacentToRoad) {
+					available.add(edge);
+				}
+			}
+		}
+		
+		return available;
+	}
+
+	/**
+	 * Gets the index of a player in the players array.
+	 * @param player the player to find
+	 * @return the index of the player, or -1 if not found
+	 */
+	private int getPlayerNumber(Player player) {
+		for (int i = 0; i < players.length; i++) {
+			if (players[i] == player) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	/**
+	 * Gets all node IDs that the player currently occupies (settlements/cities).
+	 * @param player the player
+	 * @return list of occupied node IDs
+	 */
+	private List<Integer> getOccupiedNodeIds(Player player) {
+
+		List<Integer> occupied = new ArrayList<>();
+		
+		for (int i = 0; i < TOTAL_NODES; i++) {
+			Node node = board.getNode(i);
+			if (node != null && node.isOccupied() && node.getOccupyingPlayer() == player) {
+				occupied.add(i);
+			}
+		}
+		
+		return occupied;
+
+	}
+
+	/**
+	 * Gets all node IDs adjacent to the given node that are NOT occupied.
+	 * @param nodeId the node to find adjacent unoccupied nodes for
+	 * @return list of adjacent unoccupied node IDs
+	 */
+	private List<Integer> getAdjacentUnoccupiedNodeIds(int nodeId) {
+
+		List<Integer> adjacent = new ArrayList<>();
+		Node node = board.getNode(nodeId);
+		if (node == null) {
+			return adjacent;
+		}
+		
+		// Check all edges to find adjacent nodes
+		for (Edge edge : board.getEdges()) {
+			if (edge != null && edge.touches(node)) {
+				Node otherNode = (edge.getNodeA() == node) ? edge.getNodeB() : edge.getNodeA();
+
+				// Only include if not occupied
+				if (!otherNode.isOccupied()) {
+					int otherId = otherNode.getId();
+					if (!adjacent.contains(otherId)) {
+						adjacent.add(otherId);
+					}
+				}
+			}
+		}
+		
+		return adjacent;
+
+	}
+
+	/**
 	 * Checks if the game is over for a specific player (they reached victory point goal).
 	 * @param player The player to check
 	 * @return true if player has reached victory point goal, false otherwise
@@ -415,5 +956,168 @@ public class Game {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Orchestrates settlement placement during setup (no resource cost).
+	 * GRASP: Controller - Game orchestrates the full placement flow.
+	 * @param node The node where the settlement will be placed
+	 * @param player The player placing the settlement
+	 * @return true if placement succeeded, false otherwise
+	 */
+	private boolean placeSettlementSetup(Node node, Player player) {
+		// 1. Validate placement rules
+		if (!validator.canPlaceSettlement(node, player, true)) {
+			return false;
+		}
+
+		// 2. Use settlement piece (no resources paid during setup)
+		if (!bank.useSettlementPieceSetup(player)) {
+			return false;
+		}
+
+		// 3. Update node state
+		node.setBuilding(new Settlement(player));
+		node.setOccupyingPlayer(player);
+
+		// 4. Add victory point
+		player.addVictoryPoint(1);
+
+		refreshVisualizerState();
+		return true;
+	}
+	/**
+	 * Orchestrates settlement placement during normal play.
+	 * GRASP: Controller - Game orchestrates the full placement flow.
+	 * @param node The node where the settlement will be placed
+	 * @param player The player placing the settlement
+	 * @return true if placement succeeded, false otherwise
+	 */
+	private boolean placeSettlement(Node node, Player player) {
+		// 1. Validate placement rules
+		if (!validator.canPlaceSettlement(node, player, false)) {
+			return false;
+		}
+
+		// Check road connectivity (normal play requirement)
+		boolean hasRoadConnection = false;
+		for (Edge edge : board.getEdges()) {
+			if (edge != null && edge.touches(node) && edge.getRoad() != null && edge.getRoad().getOwner() == player) {
+				hasRoadConnection = true;
+				break;
+			}
+		}
+		if (!hasRoadConnection) {
+			return false;
+		}
+
+		// 2. Pay for settlement
+		if (!bank.payForSettlement(player)) {
+			return false;
+		}
+
+		// 3. Update node state
+		node.setBuilding(new Settlement(player));
+		node.setOccupyingPlayer(player);
+
+		refreshVisualizerState();
+		return true;
+	}
+
+	/**
+	 * Orchestrates city placement (upgrade settlement).
+	 * GRASP: Controller - Game orchestrates the full placement flow.
+	 * @param node The node where the city will be placed (must have a settlement)
+	 * @param player The player placing the city
+	 * @return true if placement succeeded, false otherwise
+	 */
+	private boolean placeCity(Node node, Player player) {
+		// 1. Validate placement rules
+		if (!validator.canPlaceCity(node, player)) {
+			return false;
+		}
+
+		// 2. Pay for city
+		if (!bank.payForCity(player)) {
+			return false;
+		}
+
+		// 3. Update node state (upgrade settlement to city)
+		node.setBuilding(new City(player));
+		node.setOccupyingPlayer(player);
+
+		refreshVisualizerState();
+		return true;
+	}
+
+	/**
+	 * Orchestrates road placement during setup (no resource cost).
+	 * GRASP: Controller - Game orchestrates the full placement flow.
+	 * @param edge The edge where the road will be placed
+	 * @param player The player placing the road
+	 * @return true if placement succeeded, false otherwise
+	 */
+	private boolean placeRoadSetup(Edge edge, Player player) {
+		// 1. Validate placement rules
+		if (!validator.canPlaceRoad(edge, player, true)) {
+			return false;
+		}
+
+		// 2. Use road piece (no resources paid during setup)
+		if (!bank.useRoadPieceSetup(player)) {
+			return false;
+		}
+
+		// 3. Update edge state
+		edge.setRoad(new Road(player, edge));
+
+		refreshVisualizerState();
+		return true;
+	}
+
+	/**
+	 * Orchestrates road placement during normal play.
+	 * GRASP: Controller - Game orchestrates the full placement flow.
+	 * @param edge The edge where the road will be placed
+	 * @param player The player placing the road
+	 * @return true if placement succeeded, false otherwise
+	 */
+	private boolean placeRoad(Edge edge, Player player) {
+		// 1. Validate placement rules
+		if (!validator.canPlaceRoad(edge, player, false)) {
+			return false;
+		}
+
+		// Check connectivity (must be adjacent to player's building or road)
+		Node nodeA = edge.getNodeA();
+		Node nodeB = edge.getNodeB();
+		boolean adjacentToBuilding = (nodeA.isOccupied() && nodeA.getOccupyingPlayer() == player) ||
+									(nodeB.isOccupied() && nodeB.getOccupyingPlayer() == player);
+
+		boolean adjacentToRoad = false;
+		for (Edge otherEdge : board.getEdges()) {
+			if (otherEdge != null && otherEdge != edge && otherEdge.getRoad() != null &&
+				otherEdge.getRoad().getOwner() == player) {
+				if (edge.touches(otherEdge.getNodeA()) || edge.touches(otherEdge.getNodeB())) {
+					adjacentToRoad = true;
+					break;
+				}
+			}
+		}
+
+		if (!adjacentToBuilding && !adjacentToRoad) {
+			return false;
+		}
+
+		// 2. Pay for road
+		if (!bank.payForRoad(player)) {
+			return false;
+		}
+
+		// 3. Update edge state
+		edge.setRoad(new Road(player, edge));
+
+		refreshVisualizerState();
+		return true;
 	}
 }
