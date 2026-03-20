@@ -64,7 +64,7 @@ public class RandomBoardGenerator implements IBoardGenerator {
 			{25, 6, 9, 26, 27, 24}, 	// Tile 13
 			{52, 22, 7, 6, 25, 53}, 	// Tile 14
 			{51, 48, 23, 22, 52, 50}, 	// Tile 15
-			{29, 45, 20, 19, 23, 48}, 	// Tile 16
+			{49, 45, 20, 19, 23, 48}, 	// Tile 16
 			{46, 47, 43, 21, 20, 45}, 	// Tile 17
 			{43, 44, 40, 17, 16, 21}    // Tile 18
 		};

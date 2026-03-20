@@ -119,22 +119,22 @@ public class Game {
 	}
 
 	/**
-	 * Setup phase: each player places 2 settlements and 2 roads in one go.
+	 * Setup phase in two rounds.
+	 * In each round, every player places one settlement and one road attached
+	 * to that settlement: S1-R1 for all players, then S2-R2 for all players.
 	 */
 	public void setupInitialSettlements() {
-		// Each player takes their turn to place initial buildings
-		for (int i = 0; i < players.length; i++) {
-			Player player = players[i]; // Current player setting up
-			System.out.println("\n=== " + player.getColor() + " Player Setup ===");
+		for (int setupRound = 1; setupRound <= 2; setupRound++) {
+			for (int i = 0; i < players.length; i++) {
+				Player player = players[i];
+				System.out.println("\n=== " + player.getColor() + " Player Setup Round " + setupRound + " ===");
 
-			if (player instanceof HumanPlayer) {
-				setupInitialSettlementsHuman((HumanPlayer) player);
-			} else {
-				// AI setup: automated placement of roads & settlements
-				aiSetupSettlement(player, 1);
-				aiSetupRoad(player, 1);
-				aiSetupSettlement(player, 2);
-				aiSetupRoad(player, 2);
+				if (player instanceof HumanPlayer) {
+					setupInitialPlacementHuman((HumanPlayer) player, setupRound);
+				} else {
+					int settlementNodeId = aiSetupSettlement(player, setupRound);
+					aiSetupRoadFromSettlement(player, setupRound, settlementNodeId);
+				}
 			}
 		}
 	}
@@ -143,14 +143,15 @@ public class Game {
 	 * Places one settlement for an AI player during setup (random choice).
 	 * @param player The player placing the settlement
 	 * @param settlementNumber Which settlement this is (1 or 2)
+	 * @return placed settlement node id, or -1 if placement failed
 	 */
-	private void aiSetupSettlement(Player player, int settlementNumber) {
+	private int aiSetupSettlement(Player player, int settlementNumber) {
 		// Get all available nodes (following distance rule)
 		List<Integer> availableNodes = actions.getAvailableSettlementNodes();
 
 		if (availableNodes.isEmpty()) {
 			System.out.println(player.getColor() + " - No available nodes for settlement #" + settlementNumber);
-			return;
+			return -1;
 		}
 
 		// Choose randomly from available nodes
@@ -159,41 +160,25 @@ public class Game {
 
 		if (node != null && actions.placeSettlementSetup(node, player)) {
 			System.out.println(roundCount + " / " + player.getColor() + ": Placed settlement #" + settlementNumber + " on node " + nodeId);
+			return nodeId;
 		}
+		return -1;
 	}
 
 	/**
-	 * Places one road for an AI player during setup (random choice).
+	 * Places one road for an AI player during setup that must connect to the
+	 * settlement placed in the same setup turn.
 	 * @param player The player placing the road
 	 * @param roadNumber Which road this is (1 or 2)
+	 * @param settlementNodeId node id of the settlement placed immediately before this road
 	 */
-	private void aiSetupRoad(Player player, int roadNumber) {
-		// Get all nodes the player occupies
-		List<Integer> occupiedNodes = actions.getOccupiedNodeIds(player);
-
-		if (occupiedNodes.isEmpty()) {
-			System.out.println(player.getColor() + " - No settlements to build roads from");
+	private void aiSetupRoadFromSettlement(Player player, int roadNumber, int settlementNodeId) {
+		if (settlementNodeId < 0) {
+			System.out.println(player.getColor() + " - Cannot place road #" + roadNumber + " (no settlement placed)");
 			return;
 		}
-
-		// Choose random starting node from player's settlements
-		int firstNodeId = occupiedNodes.get(random.nextInt(occupiedNodes.size()));
-
-		// Get adjacent unoccupied nodes
+		int firstNodeId = settlementNodeId;
 		List<Integer> adjacentUnoccupied = actions.getAdjacentUnoccupiedNodeIds(firstNodeId);
-
-		if (adjacentUnoccupied.isEmpty()) {
-			// Try another occupied node if first one has no adjacent unoccupied nodes
-			for (int occupiedId : occupiedNodes) {
-				if (occupiedId != firstNodeId) {
-					adjacentUnoccupied = actions.getAdjacentUnoccupiedNodeIds(occupiedId);
-					if (!adjacentUnoccupied.isEmpty()) {
-						firstNodeId = occupiedId;
-						break;
-					}
-				}
-			}
-		}
 
 		if (adjacentUnoccupied.isEmpty()) {
 			System.out.println(player.getColor() + " - No available adjacent nodes for road #" + roadNumber);
@@ -211,57 +196,61 @@ public class Game {
 	}
 
 	/**
-	 * Setup phase for a human player: interactively place 2 settlements and 2 roads.
-	 * Uses the same command syntax as the main human turn but only allows
-	 * build settlement / build road during setup.
-	 *
-	 * Order: Settlement 1, Road 1, Settlement 2, Road 2.
+	 * Setup placement for a human player for one setup round:
+	 * place one settlement and then one road attached to that settlement.
 	 * @param player the human player setting up
+	 * @param placementNumber setup round number (1 or 2)
 	 */
-	private void setupInitialSettlementsHuman(HumanPlayer player) {
-		for (int n = 1; n <= 2; n++) {
-			// Settlement n
-			while (true) {
-				System.out.println("Place settlement #" + n + " (command: build settlement <nodeId>):");
-				System.out.print("> ");
-				HumanCommandParser.ParsedCommand cmd = HumanCommandParser.parse(scanner.nextLine());
-				if (cmd.getAction() != HumanCommandParser.Action.BUILD_SETTLEMENT) {
-					System.out.println("Please use: build settlement <nodeId>");
-					continue;
-				}
-				Node node = board.getNode(cmd.getNodeId());
-				if (node == null) {
-					System.out.println("Invalid node.");
-					continue;
-				}
-				if (actions.placeSettlementSetup(node, player)) {
-					System.out.println("Settlement built on node " + cmd.getNodeId());
-					break;
-				} else {
-					System.out.println("Cannot build settlement there. Try another node.");
-				}
+	private void setupInitialPlacementHuman(HumanPlayer player, int placementNumber) {
+		int placedSettlementNodeId = -1;
+		// Settlement
+		while (true) {
+			System.out.println("Place settlement #" + placementNumber + " (command: build settlement <nodeId>):");
+			System.out.print("> ");
+			HumanCommandParser.ParsedCommand cmd = HumanCommandParser.parse(scanner.nextLine());
+			if (cmd.getAction() != HumanCommandParser.Action.BUILD_SETTLEMENT) {
+				System.out.println("Please use: build settlement <nodeId>");
+				continue;
 			}
+			Node node = board.getNode(cmd.getNodeId());
+			if (node == null) {
+				System.out.println("Invalid node.");
+				continue;
+			}
+			if (actions.placeSettlementSetup(node, player)) {
+				placedSettlementNodeId = cmd.getNodeId();
+				System.out.println("Settlement built on node " + cmd.getNodeId());
+				break;
+			} else {
+				System.out.println("Cannot build settlement there. Try another node.");
+			}
+		}
 
-			// Road n
-			while (true) {
-				System.out.println("Place road #" + n + " (command: build road <fromNodeId>,<toNodeId>):");
-				System.out.print("> ");
-				HumanCommandParser.ParsedCommand cmd = HumanCommandParser.parse(scanner.nextLine());
-				if (cmd.getAction() != HumanCommandParser.Action.BUILD_ROAD) {
-					System.out.println("Please use: build road <fromNodeId>,<toNodeId>");
-					continue;
-				}
-				Edge edge = board.findEdge(cmd.getFromNodeId(), cmd.getToNodeId());
-				if (edge == null) {
-					System.out.println("No edge between those nodes.");
-					continue;
-				}
-				if (actions.placeRoadSetup(edge, player)) {
-					System.out.println("Road built from node " + cmd.getFromNodeId() + " to node " + cmd.getToNodeId());
-					break;
-				} else {
-					System.out.println("Cannot build road there. Try another pair of nodes.");
-				}
+		// Road (must connect to the settlement just placed)
+		while (true) {
+			System.out.println("Place road #" + placementNumber + " from settlement node " + placedSettlementNodeId
+					+ " (command: build road <fromNodeId>,<toNodeId>):");
+			System.out.print("> ");
+			HumanCommandParser.ParsedCommand cmd = HumanCommandParser.parse(scanner.nextLine());
+			if (cmd.getAction() != HumanCommandParser.Action.BUILD_ROAD) {
+				System.out.println("Please use: build road <fromNodeId>,<toNodeId>");
+				continue;
+			}
+			Edge edge = board.findEdge(cmd.getFromNodeId(), cmd.getToNodeId());
+			if (edge == null) {
+				System.out.println("No edge between those nodes.");
+				continue;
+			}
+			Node justPlaced = board.getNode(placedSettlementNodeId);
+			if (justPlaced == null || !edge.touches(justPlaced)) {
+				System.out.println("Road must connect to settlement node " + placedSettlementNodeId + ".");
+				continue;
+			}
+			if (actions.placeRoadSetup(edge, player)) {
+				System.out.println("Road built from node " + cmd.getFromNodeId() + " to node " + cmd.getToNodeId());
+				break;
+			} else {
+				System.out.println("Cannot build road there. Try another pair of nodes.");
 			}
 		}
 	}
