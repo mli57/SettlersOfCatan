@@ -8,16 +8,16 @@ package SettlersOfCatan;
  */
 public class BuildSettlementCommand implements GameCommand {
 
-    /** The node where the settlement will be placed **/
+    /** The node where the settlement will be placed */
     private final Node node;
 
-    /** The player building the settlement **/
+    /** The player building the settlement */
     private final Player player;
 
-    /** The bank for resource transactions **/
+    /** The bank for resource transactions */
     private final Bank bank;
 
-    /** The PlayerActions instance for placement logic **/
+    /** The PlayerActions instance for placement logic */
     private final PlayerActions actions;
 
     /**
@@ -43,7 +43,8 @@ public class BuildSettlementCommand implements GameCommand {
     }
 
     /**
-     * Undoes the settlement placement, removing the building and refunding resources.
+     * Clears the settlement from the node, refunds the bank cost to the player,
+     * and refreshes the visualizer state.
      */
     @Override
     public void undo() {

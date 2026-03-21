@@ -5,7 +5,7 @@ package SettlersOfCatan;
  * @author Kabir Singh Sachdeva, Adrian Najmi, Sarthak Kulashari, Maxwell Li
  */
 public class ResourceCard {
-	/** The type of resource this card represents **/
+	/** The type of resource this card represents */
 	private final ResourceType type;
 
 	/**

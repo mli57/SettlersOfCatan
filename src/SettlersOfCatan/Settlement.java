@@ -5,7 +5,7 @@ package SettlersOfCatan;
  * @author Kabir Singh Sachdeva, Adrian Najmi, Sarthak Kulashari, Maxwell Li
  */
 public class Settlement extends Building {
-	/** Victory points awarded for a settlement **/
+	/** Victory points awarded for a settlement */
 	private static final int VICTORY_POINTS = 1;
 
 	/**

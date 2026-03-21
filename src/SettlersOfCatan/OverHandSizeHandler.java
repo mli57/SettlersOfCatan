@@ -6,7 +6,8 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * Forces spending when a player holds more than 7 real cards.
+ * Forces spending when a player holds more than seven real resource cards.
+ *
  * @author Kabir Singh Sachdeva, Adrian Najmi, Sarthak Kulashari, Maxwell Li
  */
 public class OverHandSizeHandler extends ActionHandler {
@@ -18,6 +19,14 @@ public class OverHandSizeHandler extends ActionHandler {
 		super(random);
 	}
 
+	/**
+	 * If the player has more than seven real resource cards, forces a build using the best
+	 * non-pass action from available actions; otherwise forwards to the next handler in the chain.
+	 *
+	 * @param player     the AI player taking this turn
+	 * @param actions    facade for builds and board queries
+	 * @param roundCount current round (for logging on successful build)
+	 */
 	@Override
 	public void handleTurn(Player player, PlayerActions actions, int roundCount) {
 		int realCards = 0;

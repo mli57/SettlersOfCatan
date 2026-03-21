@@ -7,7 +7,7 @@ import java.util.Random;
  * @author Kabir Singh Sachdeva, Adrian Najmi, Sarthak Kulashari, Maxwell Li
  */
 public class DiceRoller implements Dice {
-	/** Random number generator for dice rolls **/
+	/** Random number generator for dice rolls */
 	private final Random random = new Random();
 
 	/**

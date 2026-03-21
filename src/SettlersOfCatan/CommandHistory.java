@@ -11,10 +11,10 @@ import java.util.Deque;
  */
 public class CommandHistory {
 
-    /** Stack of executed commands available for undo **/
+    /** Stack of executed commands available for undo */
     private Deque<GameCommand> history;
 
-    /** Stack of undone commands available for redo **/
+    /** Stack of undone commands available for redo */
     private Deque<GameCommand> redoStack;
 
     /**

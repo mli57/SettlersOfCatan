@@ -18,6 +18,14 @@ public class ValueScoringHandler extends ActionHandler {
 		super(random);
 	}
 
+	/**
+	 * Scores every available action for this player, picks one of the highest-scoring actions
+	 * (random tie-break), and executes it. This is the last handler in the chain (no successor).
+	 *
+	 * @param player     the AI player taking this turn
+	 * @param actions    facade for builds and board queries
+	 * @param roundCount current round (for logging on successful build)
+	 */
 	@Override
 	public void handleTurn(Player player, PlayerActions actions, int roundCount) {
 		List<String> available = actions.getAvailableActions(player, false);

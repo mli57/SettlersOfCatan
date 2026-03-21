@@ -16,7 +16,7 @@ import java.util.Set;
  * @author Kabir Singh Sachdeva, Adrian Najmi, Sarthak Kulashari, Maxwell Li
  */
 public class Game {
-	/** The game board containing tiles, nodes, and edges **/
+	/** The game board containing tiles, nodes, and edges */
 	private Board board;
 
 	/**
@@ -27,51 +27,51 @@ public class Game {
 		return board;
 	}
 
-	/** Array of all players in the game **/
+	/** Array of all players in the game */
 	private Player[] players;
 
-	/** Index of the current player whose turn it is **/
+	/** Index of the current player whose turn it is */
 	private int currentPlayer;
 
-	/** Current round number (starts at 0) **/
+	/** Current round number; incremented after each full round of player turns (starts at 1). */
 	private int roundCount;
 
-	/** Dice object for rolling dice **/
+	/** Dice object for rolling dice */
 	private Dice dice;
 
-	/** Bank object for handling resource transactions **/
+	/** Bank object for handling resource transactions */
 	private Bank bank;
 
-	/** Validator for checking placement rules **/
+	/** Validator for checking placement rules */
 	private IPlacementValidator validator;
 
-	/** Random number generator for AI player decisions **/
+	/** Random number generator for AI player decisions */
 	private Random random;
 
-	/** Scanner for reading human player input from console **/
+	/** Scanner for reading human player input from console */
 	private final Scanner scanner = new Scanner(System.in);
 
-	/** Index of the tile currently holding the Robber (R2.5); -1 means unset. **/
+	/** Index of the tile currently holding the Robber (R2.5); -1 means unset. */
 	private int robberTileIndex = -1;
 
-	/** Victory points needed to win the game **/
+	/** Victory points needed to win the game */
 	private static final int VICTORY_POINTS_TO_WIN = 10;
 
-	/** Number of sides on each die **/
+	/** Number of sides on each die */
 	private static final int DICE_SIDES = 6;
 
-	/** Path to visualizer base map JSON (board layout). **/
+	/** Path to visualizer base map JSON (board layout). */
 	private static final String VISUALIZER_BASE_MAP_PATH = "src/SettlersOfCatan/visualize/base_map.json";
-	/** Path to visualizer state JSON (roads and buildings). **/
+	/** Path to visualizer state JSON (roads and buildings). */
 	private static final String VISUALIZER_STATE_PATH = "src/SettlersOfCatan/visualize/state.json";
 
-	/** Actions handler for AI and common placement operations **/
+	/** Actions handler for AI and common placement operations */
 	private PlayerActions actions;
 
-	/** Actions handler for human player interactive turns **/
+	/** Actions handler for human player interactive turns */
 	private HumanPlayerActions humanActions;
 
-	/** Rule-based AI action chain (Chain of Responsibility). **/
+	/** Rule-based AI action chain (Chain of Responsibility). */
 	private ActionHandler agentChain;
 
 	/**

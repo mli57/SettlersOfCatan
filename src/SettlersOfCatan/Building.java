@@ -5,7 +5,7 @@ package SettlersOfCatan;
  * @author Kabir Singh Sachdeva, Adrian Najmi, Sarthak Kulashari, Maxwell Li
  */
 public abstract class Building {
-	/** The player who owns this building **/
+	/** The player who owns this building */
 	private final Player owner;
 
 	/**

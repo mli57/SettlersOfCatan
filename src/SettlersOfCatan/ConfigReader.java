@@ -9,13 +9,13 @@ import java.io.IOException;
  * @author Kabir Singh Sachdeva, Adrian Najmi, Sarthak Kulashari, Maxwell Li
  */
 public class ConfigReader {
-	/** Path to the configuration file **/
+	/** Path to the configuration file */
     private static final String configFile = "src/SettlersOfCatan/game.config";
     
-    /** Minimum number of turns allowed **/
+    /** Minimum number of turns allowed */
     private static final int minTurns = 1;
     
-    /** Maximum number of turns allowed **/
+    /** Maximum number of turns allowed */
     private static final int maxTurns = 8192;
 
 

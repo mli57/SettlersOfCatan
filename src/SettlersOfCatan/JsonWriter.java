@@ -38,6 +38,12 @@ public class JsonWriter {
 		Files.writeString(Path.of(path), json);
 	}
 
+	/**
+	 * Builds the JSON document for the static board layout (tiles).
+	 *
+	 * @param board the game board
+	 * @return JSON string for base_map.json
+	 */
 	private static String buildBaseMapJson(Board board) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("{\n");
@@ -47,6 +53,12 @@ public class JsonWriter {
 		return sb.toString();
 	}
 
+	/**
+	 * Appends the tiles array to the given buffer.
+	 *
+	 * @param board the game board
+	 * @param sb    target buffer
+	 */
 	private static void appendTiles(Board board, StringBuilder sb) {
 		sb.append("[\n");
 		Tile[] tiles = board.getTiles();
@@ -78,6 +90,12 @@ public class JsonWriter {
 		sb.append("\n  ]");
 	}
 
+	/**
+	 * Builds the JSON document for the dynamic game state (roads and buildings).
+	 *
+	 * @param board the game board
+	 * @return JSON string for state.json
+	 */
 	private static String buildStateJson(Board board) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("{\n");
@@ -90,6 +108,12 @@ public class JsonWriter {
 		return sb.toString();
 	}
 
+	/**
+	 * Appends the roads array (edges with roads) to the given buffer.
+	 *
+	 * @param board the game board
+	 * @param sb    target buffer
+	 */
 	private static void appendRoads(Board board, StringBuilder sb) {
 		sb.append("[\n");
 		Edge[] edges = board.getEdges();
@@ -113,6 +137,12 @@ public class JsonWriter {
 		sb.append("\n  ]");
 	}
 
+	/**
+	 * Appends the buildings array for occupied nodes to the given buffer.
+	 *
+	 * @param nodes intersection nodes (may contain null entries)
+	 * @param sb    target buffer
+	 */
 	private static void appendBuildings(Node[] nodes, StringBuilder sb) {
 		sb.append("[\n");
 		boolean first = true;

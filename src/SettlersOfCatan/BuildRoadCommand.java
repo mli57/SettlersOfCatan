@@ -8,16 +8,16 @@ package SettlersOfCatan;
  */
 public class BuildRoadCommand implements GameCommand {
 
-    /** The edge where the road will be placed **/
+    /** The edge where the road will be placed */
     private final Edge edge;
 
-    /** The player building the road **/
+    /** The player building the road */
     private final Player player;
 
-    /** The bank for resource transactions **/
+    /** The bank for resource transactions */
     private final Bank bank;
 
-    /** The PlayerActions instance for placement logic **/
+    /** The PlayerActions instance for placement logic */
     private final PlayerActions actions;
 
     /**

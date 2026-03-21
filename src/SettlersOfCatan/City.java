@@ -5,7 +5,7 @@ package SettlersOfCatan;
  * @author Kabir Singh Sachdeva, Adrian Najmi, Sarthak Kulashari, Maxwell Li
  */
 public class City extends Building {
-	/** Victory points awarded for a city **/
+	/** Victory points awarded for a city */
 	private static final int VICTORY_POINTS = 2;
 
 	/**

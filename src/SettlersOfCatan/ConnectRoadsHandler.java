@@ -23,6 +23,14 @@ public class ConnectRoadsHandler extends ActionHandler {
 		this.board = board;
 	}
 
+	/**
+	 * If this player can build a road and owns two road segments that are close but disconnected,
+	 * builds a road; otherwise forwards to the next handler in the chain.
+	 *
+	 * @param player     the AI player taking this turn
+	 * @param actions    facade for builds and board queries
+	 * @param roundCount current round (for logging on successful build)
+	 */
 	@Override
 	public void handleTurn(Player player, PlayerActions actions, int roundCount) {
 		if (player.canBuildRoad() && hasCloseDisconnectedRoads(player)) {

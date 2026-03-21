@@ -12,28 +12,28 @@ import java.util.Random;
  */
 public class PlayerActions {
 
-	/** Total number of nodes on the Catan board **/
+	/** Total number of nodes on the Catan board */
 	private static final int TOTAL_NODES = 54;
 
-	/** Maximum resources a player can have before being forced to build **/
+	/** Maximum resources a player can have before being forced to build */
 	static final int MAX_RESOURCES_BEFORE_BUILD = 7;
 
-	/** Path to visualizer state JSON (roads and buildings). **/
+	/** Path to visualizer state JSON (roads and buildings). */
 	private static final String VISUALIZER_STATE_PATH = "src/SettlersOfCatan/visualize/state.json";
 
-	/** The game board containing tiles, nodes, and edges **/
+	/** The game board containing tiles, nodes, and edges */
 	protected Board board;
 
-	/** Bank object for handling resource transactions **/
+	/** Bank object for handling resource transactions */
 	protected Bank bank;
 
-	/** Validator for checking placement rules **/
+	/** Validator for checking placement rules */
 	protected IPlacementValidator validator;
 
-	/** Array of all players in the game **/
+	/** Array of all players in the game */
 	protected Player[] players;
 
-	/** Random number generator for AI player decisions **/
+	/** Random number generator for AI player decisions */
 	private Random random;
 
 	/**

@@ -5,10 +5,10 @@ package SettlersOfCatan;
  * @author Kabir Singh Sachdeva, Adrian Najmi, Sarthak Kulashari, Maxwell Li
  */
 public class Road {
-	/** The player who owns this road **/
+	/** The player who owns this road */
 	private final Player owner;
 	
-	/** The edge this road is placed on **/
+	/** The edge this road is placed on */
 	private final Edge edge;
 
 	/**

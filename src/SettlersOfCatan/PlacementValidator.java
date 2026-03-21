@@ -7,6 +7,16 @@ package SettlersOfCatan;
  */
 public class PlacementValidator implements IPlacementValidator {
 
+	/**
+	 * Checks if a settlement can be placed at the given node.
+	 * During setup, player may be null to evaluate only the distance rule.
+	 * Road connectivity in normal play is enforced elsewhere (PlayerActions).
+	 *
+	 * @param node the node to check
+	 * @param player the player attempting placement, or null for some setup checks
+	 * @param isSetupPhase true during initial placement
+	 * @return true if placement is valid under these rules
+	 */
 	@Override
 	public boolean canPlaceSettlement(Node node, Player player, boolean isSetupPhase) {
 
@@ -43,6 +53,16 @@ public class PlacementValidator implements IPlacementValidator {
 
 	}
 
+	/**
+	 * Checks if a road can be placed on the given edge.
+	 * During setup, the edge must touch a settlement owned by player.
+	 * Connectivity in normal play is enforced elsewhere (PlayerActions).
+	 *
+	 * @param edge the edge to check
+	 * @param player the player attempting placement
+	 * @param isSetupPhase true during initial placement
+	 * @return true if placement is valid under these rules
+	 */
 	@Override
 	public boolean canPlaceRoad(Edge edge, Player player, boolean isSetupPhase) {
 
@@ -67,6 +87,13 @@ public class PlacementValidator implements IPlacementValidator {
 
 	}
 
+	/**
+	 * Checks if the node can be upgraded to a city (must own a settlement there).
+	 *
+	 * @param node the node to check
+	 * @param player the player attempting the upgrade
+	 * @return true if the upgrade is valid
+	 */
 	@Override
 	public boolean canPlaceCity(Node node, Player player) {
 

@@ -6,16 +6,16 @@ package SettlersOfCatan;
  * @author Kabir Singh Sachdeva, Adrian Najmi, Sarthak Kulashari, Maxwell Li
  */
 public class Edge {
-	/** Unique ID for this edge **/
+	/** Unique ID for this edge */
 	private final int id;
 	
-	/** First endpoint node **/
+	/** First endpoint node */
 	private final Node nodeA;
 	
-	/** Second endpoint node **/
+	/** Second endpoint node */
 	private final Node nodeB;
 	
-	/** Road placed on this edge, or null if empty **/
+	/** Road placed on this edge, or null if empty */
 	private Road road;
 
 	/**

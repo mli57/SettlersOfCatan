@@ -16,10 +16,11 @@ public interface IPlacementValidator {
 
 	/**
 	 * Checks if a road can be placed on the given edge.
+	 *
 	 * @param edge the edge to check
 	 * @param player the player attempting placement
-	 * @param isSetupPhase true if this is during initial setup
-	 * @return true if placement is valid
+	 * @param isSetupPhase {@code true} if this is during initial setup
+	 * @return {@code true} if placement is valid
 	 */
 	boolean canPlaceRoad(Edge edge, Player player, boolean isSetupPhase);
 

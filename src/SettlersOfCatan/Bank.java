@@ -10,13 +10,13 @@ import java.util.Map;
  * @author Kabir Singh Sachdeva, Adrian Najmi, Sarthak Kulashari, Maxwell Li
  */
 public class Bank {
-	/** Cost map for building a settlement **/
+	/** Cost map for building a settlement */
 	private static final Map<ResourceType, Integer> SETTLEMENT_COST = new EnumMap<>(ResourceType.class);
 	
-	/** Cost map for building a city **/
+	/** Cost map for building a city */
 	private static final Map<ResourceType, Integer> CITY_COST = new EnumMap<>(ResourceType.class);
 	
-	/** Cost map for building a road **/
+	/** Cost map for building a road */
 	private static final Map<ResourceType, Integer> ROAD_COST = new EnumMap<>(ResourceType.class);
 
 	static {

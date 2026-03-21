@@ -6,13 +6,13 @@ package SettlersOfCatan;
  * @author Kabir Singh Sachdeva, Adrian Najmi, Sarthak Kulashari, Maxwell Li
  */
 public class Board {
-	/** Array of all hex tiles on the board **/
+	/** Array of all hex tiles on the board */
 	private Tile[] tiles;
 	
-	/** Array of all intersection nodes on the board **/
+	/** Array of all intersection nodes on the board */
 	private Node[] nodes;
 	
-	/** Array of all edges (roads) connecting nodes **/
+	/** Array of all edges (roads) connecting nodes */
 	private Edge[] edges;
 
 	/**

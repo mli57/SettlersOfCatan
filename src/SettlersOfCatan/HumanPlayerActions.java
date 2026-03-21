@@ -14,22 +14,22 @@ import java.util.function.IntConsumer;
  */
 public class HumanPlayerActions extends PlayerActions {
 
-	/** Scanner for reading human player input from console **/
+	/** Scanner for reading human player input from console */
 	private Scanner scanner;
 
-	/** Command history for undo/redo support (R3.1) **/
+	/** Command history for undo/redo support (R3.1) */
 	private CommandHistory commandHistory;
 
-	/** Dice object for rolling dice **/
+	/** Dice object for rolling dice */
 	private Dice dice;
 
-	/** Number of sides on each die **/
+	/** Number of sides on each die */
 	private int diceSides;
 
-	/** Callback to distribute resources for a given dice roll **/
+	/** Callback to distribute resources for a given dice roll */
 	private IntConsumer distributeResources;
 
-	/** Callback to handle robber mechanics for a given active player **/
+	/** Callback to handle robber mechanics for a given active player */
 	private Consumer<Player> handleRobber;
 
 	/**

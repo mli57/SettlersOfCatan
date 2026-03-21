@@ -9,7 +9,7 @@ import java.util.Random;
  * @author Kabir Singh Sachdeva, Adrian Najmi, Sarthak Kulashari, Maxwell Li
  */
 public class RandomBoardGenerator implements IBoardGenerator {
-	/** Random number generator for board generation **/
+	/** Random number generator for board generation */
 	private final Random random;
 
 	/**

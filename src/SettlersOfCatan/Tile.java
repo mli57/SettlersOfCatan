@@ -7,7 +7,7 @@ import java.util.Map;
  * @author Kabir Singh Sachdeva, Adrian Najmi, Sarthak Kulashari, Maxwell Li
  */
 public class Tile {
-	/** Map from terrain types to the resource they produce **/
+	/** Map from terrain types to the resource they produce */
 	private static final Map<TerrainType, ResourceType> TERRAIN_TO_RESOURCE = Map.of(
 		TerrainType.FOREST, ResourceType.WOOD,
 		TerrainType.PASTURE, ResourceType.SHEEP,
@@ -17,22 +17,22 @@ public class Tile {
 		TerrainType.DESERT, ResourceType.NULL
 	);
 	
-	/** Q coordinate in cube coordinate system **/
+	/** Q coordinate in cube coordinate system */
 	private final int q;
 	
-	/** S coordinate in cube coordinate system **/
+	/** S coordinate in cube coordinate system */
 	private final int s;
 	
-	/** R coordinate in cube coordinate system **/
+	/** R coordinate in cube coordinate system */
 	private final int r;
 	
-	/** The terrain type of this tile **/
+	/** The terrain type of this tile */
 	private final TerrainType terrain;
 	
-	/** Dice number 2-12 (0 for desert) **/
+	/** Dice number 2-12 (0 for desert) */
 	private final int number;
 	
-	/** Array of node IDs (0-53) that touch this tile **/
+	/** Array of node IDs (0-53) that touch this tile */
 	private final int[] nodeIds;
 
 	/**

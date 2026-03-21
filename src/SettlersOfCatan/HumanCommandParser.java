@@ -83,6 +83,9 @@ public final class HumanCommandParser {
     }
 
 
+    /**
+     * Recognized console verbs produced by parse(String).
+     */
     public enum Action {
         ROLL, GO, LIST, BUILD_SETTLEMENT, BUILD_CITY, BUILD_ROAD, UNDO, REDO, UNKNOWN
     }
@@ -119,15 +122,30 @@ public final class HumanCommandParser {
             return new ParsedCommand(Action.UNKNOWN, -1, -1, -1);
         }
 
-        public Action getAction() { 
+        /**
+         * @return the parsed action type
+         */
+        public Action getAction() {
             return action;
         }
+
+        /**
+         * @return settlement/city node id, or {@code -1} if not applicable
+         */
         public int getNodeId() {
             return nodeId;
         }
+
+        /**
+         * @return road source node id, or {@code -1} if not applicable
+         */
         public int getFromNodeId() {
             return fromNodeId;
         }
+
+        /**
+         * @return road destination node id, or {@code -1} if not applicable
+         */
         public int getToNodeId() {
             return toNodeId;
         }

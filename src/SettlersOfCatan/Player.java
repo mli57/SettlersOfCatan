@@ -11,16 +11,16 @@ import java.util.Map;
  * @author Kabir Singh Sachdeva, Adrian Najmi, Sarthak Kulashari, Maxwell Li
  */
 public class Player {
-	/** The player's color (RED, BLUE, WHITE, ORANGE) **/
+	/** The player's color (RED, BLUE, WHITE, ORANGE) */
 	private PlayerColor color;
 	
-	/** Map of resource types to quantities owned by this player **/
+	/** Map of resource types to quantities owned by this player */
 	private Map<ResourceType, Integer> resources;
 	
-	/** Map of building types to remaining pieces available **/
+	/** Map of building types to remaining pieces available */
 	private Map<BuildingType, Integer> buildings;
 	
-	/** Current victory points earned by this player **/
+	/** Current victory points earned by this player */
 	private int victoryPoints;
 
 	/**

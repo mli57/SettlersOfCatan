@@ -7,19 +7,19 @@ package SettlersOfCatan;
  */
 public class BuildCityCommand implements GameCommand {
 
-    /** The node where the city will be placed **/
+    /** The node where the city will be placed */
     private final Node node;
 
-    /** The player building the city **/
+    /** The player building the city */
     private final Player player;
 
-    /** The bank for resource transactions **/
+    /** The bank for resource transactions */
     private final Bank bank;
 
-    /** The PlayerActions instance for placement logic **/
+    /** The PlayerActions instance for placement logic */
     private final PlayerActions actions;
 
-    /** The settlement that existed on the node before the upgrade, stored on first execute **/
+    /** The settlement that existed on the node before the upgrade, stored on first execute */
     private Building previousBuilding;
 
     /**

@@ -24,6 +24,14 @@ public class DefendRoadHandler extends ActionHandler {
 		this.board = board;
 	}
 
+	/**
+	 * If an opponent's longest road is within one of this player's longest road and the player
+	 * can build a road, builds a road; otherwise forwards to the next handler in the chain.
+	 *
+	 * @param player     the AI player taking this turn
+	 * @param actions    facade for builds and board queries
+	 * @param roundCount current round (for logging on successful build)
+	 */
 	@Override
 	public void handleTurn(Player player, PlayerActions actions, int roundCount) {
 		int myLongest = getLongestRoad(player);
